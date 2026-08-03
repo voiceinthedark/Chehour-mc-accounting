@@ -88,4 +88,41 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
 module.exports = {
   calculateMonthlyDoctorPayout,
+  confirmDoctorPayout,
 };
+
+/**
+ * Confirms and finalizes a doctor's payout for a specific month:
+ * - Recalculates the amount owed
+ * - Marks the MonthlyTally as paid out
+ * - Records a DOCTOR_PAYOUT ledger transaction
+ * All done atomically so partial writes never happen.
+ */
+async function confirmDoctorPayout(doctorId, year, month) {
+  const payout = await calculateMonthlyDoctorPayout(doctorId, year, month);
+
+  if (!payout.financials || new Decimal(payout.financials.totalOwed).lte(0)) {
+    return payout; // Nothing to pay out
+  }
+
+  const tally = await prisma.monthlyTally.findUnique({
+    where: { doctorId_month_year: { doctorId, month, year } },
+  });
+
+  const [, transaction] = await prisma.$transaction([
+    prisma.monthlyTally.update({
+      where: { id: tally.id },
+      data: { isPaidOut: true },
+    }),
+    prisma.ledgerTransaction.create({
+      data: {
+        amount: payout.financials.totalOwed,
+        isOutflow: true,
+        category: "DOCTOR_PAYOUT",
+        description: `Payout to ${payout.doctorName} for ${month}/${year}`,
+      },
+    }),
+  ]);
+
+  return { ...payout, transactionId: transaction.id };
+}

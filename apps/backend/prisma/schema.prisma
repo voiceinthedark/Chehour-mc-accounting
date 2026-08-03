@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -75,6 +75,7 @@ enum Category {
   SERVICE_FEE
   DOCTOR_PAYOUT
   LAB_COST
+  LAB_REVENUE
   CHARITY_EXPENSE
   GENERAL_EXPENSE
 }
@@ -86,4 +87,20 @@ model LedgerTransaction {
   isOutflow   Boolean
   category    Category
   description String
+}
+
+// ==========================================
+// 4. LAB WORK (Bloodwork, external samples)
+// ==========================================
+
+// The Center collects the sample, sends it to a dedicated lab,
+// and charges the patient 1.4x the amount owed to the lab.
+model LabOrder {
+  id           String   @id @default(uuid())
+  date         DateTime @default(now())
+  patientName  String?
+  testName     String
+  labCost      Decimal  @db.Decimal(10, 2) // amount owed to the external lab
+  centerCharge Decimal  @db.Decimal(10, 2) // amount charged to the patient (labCost * 1.4)
+  isSettled    Boolean  @default(false) // true once ledger entries are recorded
 }
