@@ -89,7 +89,69 @@ async function submitMonthlyTally(req, res) {
   }
 }
 
+async function addNewDoctor(req, res) {
+  const { Name, perPatientFee, perVisitFee, serviceSplits } = req.body;
+
+  try {
+    const newDoctor = await prisma.$transaction(async (tx) => {
+      const doctor = await tx.doctor.create({
+        data: { Name, perPatientFee, perVisitFee },
+      });
+
+      if (Array.isArray(serviceSplits)) {
+        for (const split of serviceSplits) {
+          await tx.doctorServiceSplit.create({
+            data: {
+              doctorId: doctor.id,
+              serviceId: split.serviceId,
+              splitType: split.splitType,
+              splitValue: split.splitValue,
+            },
+          });
+        }
+      }
+
+      return doctor;
+    });
+
+    res.json(newDoctor);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add new doctor" });
+  }
+}
+
+async function addNewService(req, res) {
+  const { name, price, doctorSplitPercent } = req.body;
+
+  try {
+    const newService = await prisma.service.create({
+      data: { name, price, doctorSplitPercent },
+    });
+    res.json(newService);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add new service" });
+  }
+}
+
+async function updateService(req, res) {
+  const { id } = req.params;
+  const { name, price, doctorSplitPercent } = req.body;
+
+  try {
+    const updatedService = await prisma.service.update({
+      where: { id },
+      data: { name, price, doctorSplitPercent },
+    });
+    res.json(updatedService);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update service" });
+  }
+}
+
 module.exports = {
   updateDoctorSettings,
   submitMonthlyTally,
+  addNewDoctor,
+  addNewService,
+  updateService,
 };

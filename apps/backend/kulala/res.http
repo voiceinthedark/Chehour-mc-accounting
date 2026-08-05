@@ -12,3 +12,17 @@ content-type: application/json
 
 ### Test Health 
 GET http://localhost:4000/health
+
+### TEST ADDING NEW DOCTOR
+POST http://localhost:4000/api/reception/doctors/new
+content-type: application/json
+
+{
+  "name": "Dr. John Doe",
+  "perPatientFee": 10,
+  "perVisitFee": 15,
+  "serviceSplits": [
+    { "serviceId": "service1", "splitType": "FLAT", "splitValue": 10 },
+    { "serviceId": "service2", "splitType": "PERCENT", "splitValue": 0.6 }
+  ]
+}
