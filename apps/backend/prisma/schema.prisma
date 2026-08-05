@@ -17,7 +17,8 @@ model Doctor {
   perPatientFee Decimal @db.Decimal(10, 2)
   perVisitFee   Decimal @db.Decimal(10, 2)
 
-  tallies MonthlyTally[]
+  tallies       MonthlyTally[]
+  serviceSplits DoctorServiceSplit[]
 }
 
 model Service {
@@ -26,7 +27,28 @@ model Service {
   price              Decimal @db.Decimal(10, 2)
   doctorSplitPercent Decimal @db.Decimal(3, 2)
 
-  logs MonthlyServiceLog[]
+  logs         MonthlyServiceLog[]
+  doctorSplits DoctorServiceSplit[]
+}
+
+enum SplitType {
+  PERCENT // Doctor gets a % of the service revenue
+  FLAT // Doctor gets a fixed amount per service performed
+}
+
+// Per-doctor override of how much a doctor earns for a specific service,
+// instead of relying on the service's default doctorSplitPercent.
+model DoctorServiceSplit {
+  id         String    @id @default(uuid())
+  doctorId   String
+  serviceId  String
+  splitType  SplitType
+  splitValue Decimal   @db.Decimal(10, 2) // percent (0-1) if PERCENT, amount if FLAT
+
+  doctor  Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, serviceId])
 }
 
 // ==========================================

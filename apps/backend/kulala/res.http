@@ -1,0 +1,14 @@
+## Kulala post request handler
+
+## Test PUT request on doctor settings
+PUT http://localhost:4000/api/reception/doctors/1/settings
+content-type: application/json
+
+{
+  "perPatientFee": 15,
+  "perVisitFee": 20,
+  "serviceSplits": [{ "serviceId": "...", "splitType": "FLAT", "splitValue": 5 }]
+}
+
+### Test Health 
+GET http://localhost:4000/health

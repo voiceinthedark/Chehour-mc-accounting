@@ -14,7 +14,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
       doctorId_month_year: { doctorId, month, year },
     },
     include: {
-      doctor: true,
+      doctor: { include: { serviceSplits: true } },
       serviceLogs: { include: { service: true } },
     },
   });
@@ -24,6 +24,11 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
   const doctor = tally.doctor;
   const totalVisits = tally.totalVisits;
+
+  // Build a quick lookup of per-doctor service overrides
+  const splitOverrides = new Map(
+    doctor.serviceSplits.map((s) => [s.serviceId, s]),
+  );
 
   let totalPatients = tally.regularPatients + tally.charityPatients;
   let servicePayout = new Decimal(0);
@@ -39,13 +44,23 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   // 3. Process EKG, Echo, etc., for this month
   tally.serviceLogs.forEach((log) => {
     const totalServices = log.regularCount + log.charityCount;
-    const serviceRevenue = new Decimal(log.service.price).mul(totalServices);
+    const override = splitOverrides.get(log.serviceId);
 
-    // Add the doctor's split to their payout
-    const doctorCut = serviceRevenue.mul(log.service.doctorSplitPercent);
+    let doctorCut;
+    if (override && override.splitType === "FLAT") {
+      // Doctor gets a fixed amount per service performed, regardless of price
+      doctorCut = new Decimal(override.splitValue).mul(totalServices);
+    } else {
+      const serviceRevenue = new Decimal(log.service.price).mul(totalServices);
+      const percent = override
+        ? new Decimal(override.splitValue)
+        : new Decimal(log.service.doctorSplitPercent);
+      doctorCut = serviceRevenue.mul(percent);
+    }
+
     servicePayout = servicePayout.plus(doctorCut);
 
-    // Track center's loss for charity services
+    // Track center's loss for charity services (always at full price, split doesn't apply)
     if (log.charityCount > 0) {
       totalCharityCost = totalCharityCost.plus(
         new Decimal(log.service.price).mul(log.charityCount),
