@@ -101,9 +101,38 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   };
 }
 
+/**
+ * Lists every doctor's payout status for a given month — useful for a
+ * reception dashboard "payouts due this month" overview.
+ */
+async function listMonthlyPayouts(year, month) {
+  const tallies = await prisma.monthlyTally.findMany({
+    where: { year, month },
+    include: { doctor: true },
+  });
+
+  const results = [];
+  for (const tally of tallies) {
+    const payout = await calculateMonthlyDoctorPayout(
+      tally.doctorId,
+      year,
+      month,
+    );
+    results.push({
+      doctorId: tally.doctorId,
+      doctorName: tally.doctor.name,
+      isPaidOut: tally.isPaidOut,
+      ...payout,
+    });
+  }
+
+  return results;
+}
+
 module.exports = {
   calculateMonthlyDoctorPayout,
   confirmDoctorPayout,
+  listMonthlyPayouts,
 };
 
 /**

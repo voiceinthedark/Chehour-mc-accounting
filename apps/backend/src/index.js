@@ -8,6 +8,8 @@ const morgan = require("morgan");
 const receptionRoutes = require("./routes/reception");
 const billingRoutes = require("./routes/billing");
 const labRoutes = require("./routes/lab");
+const ledgerRoutes = require("./routes/ledger");
+const reportsRoutes = require("./routes/reports");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -19,6 +21,8 @@ app.use(morgan("combined")); // Logging HTTP requests
 app.use("/api/reception", receptionRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api", labRoutes);
+app.use("/api/ledger", ledgerRoutes);
+app.use("/api/reports", reportsRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 

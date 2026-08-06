@@ -90,12 +90,12 @@ async function submitMonthlyTally(req, res) {
 }
 
 async function addNewDoctor(req, res) {
-  const { Name, perPatientFee, perVisitFee, serviceSplits } = req.body;
+  const { name, perPatientFee, perVisitFee, serviceSplits } = req.body;
 
   try {
     const newDoctor = await prisma.$transaction(async (tx) => {
       const doctor = await tx.doctor.create({
-        data: { Name, perPatientFee, perVisitFee },
+        data: { name, perPatientFee, perVisitFee },
       });
 
       if (Array.isArray(serviceSplits)) {
@@ -148,10 +148,114 @@ async function updateService(req, res) {
   }
 }
 
+// ==========================================
+// READ / LIST / DELETE
+// ==========================================
+
+async function getDoctors(req, res) {
+  try {
+    const doctors = await prisma.doctor.findMany({
+      include: { serviceSplits: { include: { service: true } } },
+      orderBy: { name: "asc" },
+    });
+    res.json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch doctors" });
+  }
+}
+
+async function getDoctorById(req, res) {
+  const { id } = req.params;
+
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: { id },
+      include: { serviceSplits: { include: { service: true } } },
+    });
+
+    if (!doctor) return res.status(404).json({ error: "Doctor not found" });
+    res.json(doctor);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch doctor" });
+  }
+}
+
+async function deleteDoctor(req, res) {
+  const { id } = req.params;
+
+  try {
+    await prisma.doctor.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    // Likely a foreign key constraint (existing tallies) — block deletion
+    res.status(409).json({
+      error:
+        "Failed to delete doctor. They likely have existing monthly tallies attached.",
+    });
+  }
+}
+
+async function getServices(req, res) {
+  try {
+    const services = await prisma.service.findMany({
+      orderBy: { name: "asc" },
+    });
+    res.json(services);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch services" });
+  }
+}
+
+async function getServiceById(req, res) {
+  const { id } = req.params;
+
+  try {
+    const service = await prisma.service.findUnique({ where: { id } });
+    if (!service) return res.status(404).json({ error: "Service not found" });
+    res.json(service);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch service" });
+  }
+}
+
+async function deleteService(req, res) {
+  const { id } = req.params;
+
+  try {
+    await prisma.service.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(409).json({
+      error:
+        "Failed to delete service. It likely has existing service logs attached.",
+    });
+  }
+}
+
+async function deleteDoctorServiceSplit(req, res) {
+  const { doctorId, serviceId } = req.params;
+
+  try {
+    await prisma.doctorServiceSplit.delete({
+      where: { doctorId_serviceId: { doctorId, serviceId } },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(404).json({ error: "Split override not found" });
+  }
+}
+
 module.exports = {
   updateDoctorSettings,
   submitMonthlyTally,
   addNewDoctor,
   addNewService,
   updateService,
+  getDoctors,
+  getDoctorById,
+  deleteDoctor,
+  getServices,
+  getServiceById,
+  deleteService,
+  deleteDoctorServiceSplit,
 };

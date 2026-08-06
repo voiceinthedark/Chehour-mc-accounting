@@ -8,6 +8,13 @@ const {
   addNewDoctor,
   addNewService,
   updateService,
+  getDoctors,
+  getDoctorById,
+  deleteDoctor,
+  getServices,
+  getServiceById,
+  deleteService,
+  deleteDoctorServiceSplit,
 } = require("../controllers/receptionController");
 
 // 1. SETTINGS: Update a doctor's fees and service arrangements
@@ -24,5 +31,21 @@ router.post("/services/new", addNewService);
 
 // 5. Update Service: Update an existing service's details
 router.put("/services/:id", updateService);
+
+// 6. List / Read / Delete Doctors
+router.get("/doctors", getDoctors);
+router.get("/doctors/:id", getDoctorById);
+router.delete("/doctors/:id", deleteDoctor);
+
+// 7. List / Read / Delete Services
+router.get("/services", getServices);
+router.get("/services/:id", getServiceById);
+router.delete("/services/:id", deleteService);
+
+// 8. Remove a doctor-specific service split override
+router.delete(
+  "/doctors/:doctorId/service-splits/:serviceId",
+  deleteDoctorServiceSplit,
+);
 
 module.exports = router;

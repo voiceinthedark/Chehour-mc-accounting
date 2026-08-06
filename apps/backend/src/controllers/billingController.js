@@ -3,6 +3,7 @@
 const {
   calculateMonthlyDoctorPayout,
   confirmDoctorPayout,
+  listMonthlyPayouts,
 } = require("../services/billingService");
 
 // Preview what a doctor is owed for a given month (no side effects)
@@ -37,7 +38,19 @@ async function confirmPayout(req, res) {
   }
 }
 
+async function monthlyPayoutsOverview(req, res) {
+  const { year, month } = req.params;
+
+  try {
+    const result = await listMonthlyPayouts(Number(year), Number(month));
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch monthly payouts overview" });
+  }
+}
+
 module.exports = {
   previewPayout,
   confirmPayout,
+  monthlyPayoutsOverview,
 };
