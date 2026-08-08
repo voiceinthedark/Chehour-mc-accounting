@@ -1,3 +1,4 @@
 /node_modules
 /apps/backend/.env
 /PLAN.md
+/apps/backend/logs

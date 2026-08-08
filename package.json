@@ -15,7 +15,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "backend:dev": "npm run dev -w apps/backend",
-    "web:dev": "npm run dev -w apps/web-display"
+    "web:dev": "npm run dev -w apps/web-display",
+    "prisma:seed": "npm run prisma:seed -w apps/backend",
+    "prisma:reset": "npm run prisma:reset -w apps/backend"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
