@@ -2,21 +2,51 @@
 
 import { AppBar, Toolbar, Typography } from "@mui/material";
 import LinkButton from "../Links/LinkButton";
+import "@fontsource/almarai"; // Import the Almarai font
+import "./mainHeader.scss";
 
 const MainHeader = () => {
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6">Chehour Medical Center Accounting</Typography>
-        <div style={{ marginLeft: "auto" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#277147" }}>
+      <Toolbar className="toolbar">
+        <Typography
+          variant="h6"
+          sx={{ fontFamily: "Almarai, sans-serif", fontSize: "2.5rem" }}
+        >
+          مركز شحور الصحي
+        </Typography>
+        <div className="toolbar-links">
           <LinkButton to="/" color="inherit">
-            Home
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
+            >
+              الرئيسية
+            </Typography>
           </LinkButton>
           <LinkButton to="/billing" color="inherit">
-            Billing
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
+            >
+              حسابات
+            </Typography>
+          </LinkButton>
+          <LinkButton to="/reports" color="inherit">
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
+            >
+              تقارير
+            </Typography>
           </LinkButton>
           <LinkButton to="/settings" color="inherit">
-            Settings
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
+            >
+              إعدادات
+            </Typography>
           </LinkButton>
         </div>
       </Toolbar>

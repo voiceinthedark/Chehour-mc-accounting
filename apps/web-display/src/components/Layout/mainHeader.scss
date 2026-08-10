@@ -1,0 +1,23 @@
+.toolbar {
+  direction: ltr;
+  display: flex;
+  justify-content: space-between;
+
+  .toolbar-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    direction: rtl;
+
+    a {
+      color: var(--color-button-text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+  }
+}

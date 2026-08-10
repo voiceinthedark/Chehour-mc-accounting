@@ -1,6 +1,6 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  --text: #111;
+  /* --text-h: #08060d; */
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
@@ -11,9 +11,17 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
+
+  /* --primary-color: #4caf50; */
+  /* --color-text: #111; */
+  /* --primary-button-color: #4caf50; */
+  /* --primary-button-hover-color: #45a049; */
+  /* --color-button-text: #fff; */
+  /* --secondary-button-color: #f44336; */
+  /* --secondary-button-hover-color: #da190b; */
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
