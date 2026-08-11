@@ -1,8 +1,4 @@
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Navigate,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./components/Layout/MainLayout";
 import Main from "./pages/main/Main.jsx";
 import Settings from "./pages/settings/Settings.jsx";
@@ -10,9 +6,21 @@ import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import DoctorSettings from "./pages/settings/DoctorSettings.jsx";
 import ServiceSettings from "./pages/settings/ServiceSettings.jsx";
+import { API_RECEPTION_URL } from "./apiconfig.js";
 import "./App.css";
 
 import { Toaster } from "react-hot-toast";
+
+const doctorLoader = async () => {
+  const response = await fetch(`${API_RECEPTION_URL}/doctors`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch doctors");
+  }
+
+  const data = await response.json();
+  return data;
+};
 
 const router = createBrowserRouter([
   {
@@ -54,6 +62,7 @@ const router = createBrowserRouter([
       {
         path: "doctors",
         element: <DoctorSettings />,
+        loader: doctorLoader,
       },
     ],
   },

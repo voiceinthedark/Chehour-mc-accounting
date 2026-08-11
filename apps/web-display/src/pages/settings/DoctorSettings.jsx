@@ -1,11 +1,21 @@
 // filepath: apps/web-display/src/pages/settings/DoctorSettings.jsx
 
-import { Typography } from "@mui/material";
+import { Typography, TextField, Box } from "@mui/material";
 import "@fontsource/almarai";
+import { useLoaderData } from "react-router-dom";
+import { useEffect } from "react";
+import DoctorRow from "../../components/Rows/DoctorRow";
 
 const DoctorSettings = () => {
+  // Use the useLoaderData hook to access the data loaded by the loader function
+  const data = useLoaderData();
+  useEffect(() => {
+    console.log("Loaded data:", data);
+    // TODO: Use the loaded data to populate the settings form or display relevant information
+  }, [data]);
+
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px", width: "100%" }}>
       <Typography
         variant="h3"
         component="h1"
@@ -13,12 +23,20 @@ const DoctorSettings = () => {
       >
         إعدادات الأطباء
       </Typography>
-      <Typography
-        variant="body1"
-        style={{ fontFamily: "Almarai, sans-serif", fontSize: "1.2rem" }}
+      <Box
+        component="form"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          maxWidth: 800,
+          margin: "0 auto",
+        }}
       >
-        هنا يمكنك تعديل إعدادات الأطباء حسب احتياجاتك.
-      </Typography>
+        {(data || []).map((doctor) => (
+          <DoctorRow key={doctor.id} doctor={doctor} />
+        ))}
+      </Box>
     </div>
   );
 };

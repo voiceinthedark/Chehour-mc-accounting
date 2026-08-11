@@ -20,7 +20,7 @@ app.use(morgan("combined")); // Logging HTTP requests
 
 app.use("/api/reception", receptionRoutes);
 app.use("/api/billing", billingRoutes);
-app.use("/api", labRoutes);
+app.use("/api/lab", labRoutes);
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/reports", reportsRoutes);
 
