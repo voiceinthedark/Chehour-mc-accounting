@@ -155,7 +155,7 @@ async function updateService(req, res) {
 async function getDoctors(req, res) {
   try {
     const doctors = await prisma.doctor.findMany({
-      include: { serviceSplits: { include: { service: true } } },
+      include: { serviceSplits: true },
       orderBy: { name: "asc" },
     });
     res.json(doctors);
