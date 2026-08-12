@@ -15,6 +15,13 @@ const LargeLinkButton = ({ to, children }) => {
     <Button
       variant="contained"
       onClick={handleClick}
+      sx={{
+        color: "green",
+        backgroundColor: "white",
+        border: "2px solid black",
+        borderColor: "darkgreen",
+        "&:hover": { borderColor: "green" },
+      }}
       style={{ fontSize: "1.5rem", padding: "15px 30px", margin: "10px" }}
     >
       {children}

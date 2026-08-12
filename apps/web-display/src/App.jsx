@@ -71,8 +71,8 @@ const router = createBrowserRouter([
 function App() {
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />;
-      <RouterProvider router={router} />;
+      <Toaster position="top-right" reverseOrder={false} />
+      <RouterProvider router={router} />
     </>
   );
 }

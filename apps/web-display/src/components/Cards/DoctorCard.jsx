@@ -9,6 +9,19 @@ import "@fontsource/almarai";
 import "./doctorCard.scss";
 
 const DoctorCard = ({ doctor }) => {
+  //TODO: Add functionality for edit and delete icons
+  //TODO: Add Doctor add/edit form in a modal
+
+  const formatFeesToLebaneseLira = (fees) => {
+    return Intl.NumberFormat("en-LB", {
+      style: "currency",
+      currency: "LBP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+      significantDigits: 3,
+    }).format(fees);
+  };
+
   return (
     <Card className="doctor-card">
       <CardContent className="doctor-card-body">
@@ -46,7 +59,7 @@ const DoctorCard = ({ doctor }) => {
               fontSize: "1.2rem",
             }}
           >
-            {doctor.perPatientFee.toLocaleString()} ل.ل
+            {formatFeesToLebaneseLira(doctor.perPatientFee)}
           </Typography>
         </div>
         <div
@@ -78,7 +91,7 @@ const DoctorCard = ({ doctor }) => {
               fontSize: "1.2rem",
             }}
           >
-            {doctor.perVisitFee.toLocaleString()} ل.ل
+            {formatFeesToLebaneseLira(doctor.perVisitFee)}
           </Typography>
         </div>
         <div className="doctor-card-functionality">
