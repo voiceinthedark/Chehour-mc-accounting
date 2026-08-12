@@ -14,11 +14,14 @@ const NumberField = ({ label, value, onChange, ...props }) => {
     if (!value) return "";
     const numberValue = parseFloat(value);
     if (isNaN(numberValue)) return "";
-    return new Intl.NumberFormat("ar-LB", {
+    return new Intl.NumberFormat("en-LB", {
       style: "currency",
       currency: "LBP",
+      currencyDisplay: "symbol",
+      unitDisplay: "narrow",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
+      currencySign: "accounting",
     }).format(numberValue);
   };
 

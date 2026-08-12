@@ -1,0 +1,43 @@
+.doctor-service-split-row-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  gap: 20px;
+  .doctor-service-split-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+
+    .doctor-service-split-row-name {
+      font-weight: bold;
+      margin-right: 10px;
+
+      .doctor-service-split-row-label {
+        font-weight: normal;
+        color: #666;
+      }
+    }
+
+    .doctor-service-split-row-type {
+      font-style: italic;
+      color: #999;
+      .doctor-service-split-row-label {
+        font-weight: normal;
+        color: #666;
+      }
+    }
+
+    .doctor-service-split-row-value {
+      font-weight: bold;
+      color: #333;
+      .doctor-service-split-row-label {
+        font-weight: normal;
+        color: #666;
+      }
+    }
+  }
+}
