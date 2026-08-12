@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
 
   .doctor-row {
     display: flex;
@@ -11,8 +13,6 @@
     align-items: center;
     width: 100%;
     gap: 1rem;
-    padding: 1rem;
-    border: 1px solid #ccc;
 
     .doctor-row-header {
       display: flex;
@@ -26,6 +26,7 @@
       .doctor-row-name {
         font-size: 1.2rem;
         font-weight: bold;
+        font-family: Almarai, sans-serif;
       }
 
       .doctor-row-fee {

@@ -5,6 +5,8 @@ import "@fontsource/almarai";
 import { useLoaderData } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DoctorRow from "../../components/Rows/DoctorRow";
+import DoctorCard from "../../components/Cards/DoctorCard";
+import "./doctorSettings.scss";
 
 const DoctorSettings = () => {
   const [services, setServices] = useState([]);
@@ -35,21 +37,10 @@ const DoctorSettings = () => {
       >
         إعدادات الأطباء
       </Typography>
-      <Box
-        component="form"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          maxWidth: 800,
-          margin: "0 auto",
-        }}
-      >
-        <Stack direction="column" spacing={2}>
-          {(data || []).map((doctor) => (
-            <DoctorRow key={doctor.id} doctor={doctor} services={services} />
-          ))}
-        </Stack>
+      <Box className="doctor-settings-container" component="form">
+        {(data || []).map((doctor) => (
+          <DoctorCard key={doctor.id} doctor={doctor} />
+        ))}
       </Box>
     </div>
   );

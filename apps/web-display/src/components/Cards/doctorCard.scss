@@ -1,0 +1,49 @@
+.doctor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 280px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+
+  .doctor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .doctor-card-body {
+    display: flex;
+    flex-direction: column;
+    direction: rtl;
+    align-items: start;
+
+    .doctor-card-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      font-family: Almarai, sans-serif;
+      margin-bottom: 0.8rem;
+      align-self: center;
+    }
+
+    .doctor-card-fee {
+      font-size: 1rem;
+      color: gray;
+    }
+
+    .doctor-card-visit-fee {
+      font-size: 1rem;
+      color: gray;
+    }
+
+    .doctor-card-functionality {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      margin-bottom: -0.8rem;
+    }
+  }
+}
