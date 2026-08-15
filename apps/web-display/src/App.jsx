@@ -6,6 +6,7 @@ import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import DoctorSettings from "./pages/settings/DoctorSettings.jsx";
 import ServiceSettings from "./pages/settings/ServiceSettings.jsx";
+import AddNewDoctorModal from "./components/Forms/AddNewDoctorModal.jsx";
 import { API_RECEPTION_URL } from "./apiconfig.js";
 import "./App.css";
 
@@ -63,6 +64,12 @@ const router = createBrowserRouter([
         path: "doctors",
         element: <DoctorSettings />,
         loader: doctorLoader,
+        children: [
+          {
+            path: "add",
+            element: <AddNewDoctorModal />,
+          },
+        ],
       },
     ],
   },
