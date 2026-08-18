@@ -19,7 +19,7 @@ import NumberField from "../Inputs/NumberField";
 import axios from "axios";
 import "@fontsource/almarai";
 
-const EditDoctorModal = ({ open, onClose, id }) => {
+const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
@@ -90,7 +90,9 @@ const EditDoctorModal = ({ open, onClose, id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/reception/doctors/${doctorId}`, {
+      // FIX: Ensure that the fees are sent as numbers, not strings
+      // FIX: Ensure the address of the API endpoint is correct and matches the backend route
+      await axios.put(`/api/reception/doctors/${doctorId}/settings`, {
         name: doctorName,
         perPatientFee: parseFloat(
           String(doctorPatientFee).replace(/[^0-9.-]+/g, ""),
@@ -101,6 +103,7 @@ const EditDoctorModal = ({ open, onClose, id }) => {
         serviceSplits,
       });
       toast.success("تم تعديل بيانات الطبيب بنجاح");
+      onDoctorEdited(); // Notify parent component to refresh the list
       onClose();
     } catch (error) {
       toast.error("فشل تعديل بيانات الطبيب");
@@ -274,7 +277,7 @@ const EditDoctorModal = ({ open, onClose, id }) => {
                   fontWeight: "bold",
                 }}
               >
-                إضافة
+                تعديل
               </Typography>
             </Button>
             <Button variant="contained" color="secondary" onClick={onClose}>

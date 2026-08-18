@@ -2,12 +2,7 @@
 
 import { Typography, Box, Pagination } from "@mui/material";
 import "@fontsource/almarai";
-import {
-  useLoaderData,
-  useNavigate,
-  Outlet,
-  useRevalidator,
-} from "react-router-dom";
+import { useLoaderData, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { PersonAdd } from "@mui/icons-material";
 import DoctorCard from "../../components/Cards/DoctorCard";
@@ -21,23 +16,37 @@ const DoctorSettings = () => {
   // Use the useLoaderData hook to access the data loaded by the loader function
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const itemsPerPage = 6; // Number of items to display per page
-  const data = useLoaderData();
-  const navigate = useNavigate();
+  const loaderData = useLoaderData();
+  const [doctors, setDoctors] = useState(loaderData);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const paginatedData = data.slice(
+  const paginatedData = doctors.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
-  const revalidator = useRevalidator();
+  const fetchDoctors = async () => {
+    try {
+      const response = await fetch("/api/reception/doctors");
+      if (!response.ok) {
+        throw new Error("Failed to fetch doctors");
+      }
+      const data = await response.json();
+      setDoctors(data);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
-  useEffect(() => {
-    console.log("Loaded data:", data);
-    console.log("Paginated data:", paginatedData);
-  }, [data]);
+  const handleDoctorEdited = () => {
+    fetchDoctors(); // Refresh the list of doctors after editing
+    setIsModalOpen(false);
+  };
+
+  const handleDoctorAdded = () => {
+    fetchDoctors(); // Refresh the list of doctors after adding a new one
+    setIsModalOpen(false);
+  };
 
   // Fetch services from the backend API
   useEffect(() => {
@@ -86,12 +95,13 @@ const DoctorSettings = () => {
               doctorId={doctor.id}
               doctor={doctor}
               services={services}
+              onDoctorEdited={handleDoctorEdited}
             />
           ))}
         </Box>
 
         <Pagination
-          count={Math.ceil(data.length / itemsPerPage)}
+          count={Math.ceil(doctors.length / itemsPerPage)}
           page={currentPage}
           onChange={(event, value) => setCurrentPage(value)}
           color="primary"
@@ -106,8 +116,12 @@ const DoctorSettings = () => {
       {
         <AddNewDoctorModal
           open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            fetchDoctors(); // Refresh the list of doctors after adding a new one
+            setIsModalOpen(false);
+          }}
           services={services}
+          onDoctorAdded={handleDoctorAdded}
         />
       }
     </>

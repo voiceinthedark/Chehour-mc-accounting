@@ -18,7 +18,7 @@ import "@fontsource/almarai";
 import axios from "axios";
 import "./addNewDoctorModal.scss";
 
-const AddNewDoctorModal = ({ open, onClose, services }) => {
+const AddNewDoctorModal = ({ open, onClose, services, onDoctorAdded }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
@@ -57,15 +57,21 @@ const AddNewDoctorModal = ({ open, onClose, services }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post("/api/reception/doctors/new", {
-      name: doctorName,
-      perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
-      perVisitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
-      serviceSplits,
-    });
-    onClose();
-    // Add a success toast notification
-    toast.success("تم إضافة الطبيب بنجاح");
+    try {
+      await axios.post("/api/reception/doctors/new", {
+        name: doctorName,
+        perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
+        perVisitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
+        serviceSplits,
+      });
+      // Add a success toast notification
+      toast.success("تم إضافة الطبيب بنجاح");
+      onDoctorAdded(); // Notify parent component to refresh the list
+      onClose();
+    } catch (error) {
+      console.error("Error adding doctor:", error);
+      toast.error("فشل في إضافة الطبيب. حاول مرة أخرى.");
+    }
   };
 
   const getServiceName = (id) => services.find((s) => s.id === id)?.name ?? id;

@@ -10,7 +10,7 @@ import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import "@fontsource/almarai";
 import "./doctorCard.scss";
 
-const DoctorCard = ({ doctorId, doctor }) => {
+const DoctorCard = ({ doctorId, doctor, onDoctorEdited }) => {
   //TODO: Add functionality for edit and delete icons
   //TODO: Add Doctor add/edit form in a modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -121,6 +121,7 @@ const DoctorCard = ({ doctorId, doctor }) => {
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         id={doctorId}
+        onDoctorEdited={onDoctorEdited}
       />
     </>
   );
