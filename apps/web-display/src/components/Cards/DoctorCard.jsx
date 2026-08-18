@@ -3,18 +3,32 @@
 import { useState } from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import EditDoctorModal from "../Forms/EditDoctorModal";
+import DeleteDoctorConfirm from "../Forms/DeleteDoctorConfirm";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import LocalAtmIcon from "@mui/icons-material/LocalAtm";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import axios from "axios";
 import "@fontsource/almarai";
 import "./doctorCard.scss";
 
-const DoctorCard = ({ doctorId, doctor, onDoctorEdited }) => {
+const DoctorCard = ({ doctorId, doctor, onDoctorEdited, onDoctorDeleted }) => {
   //TODO: Add functionality for edit and delete icons
-  //TODO: Add Doctor add/edit form in a modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDeleteDoctor = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:4000/api/reception/doctors/${doctorId}`,
+      );
+      setIsDeleteModalOpen(false);
+      // Optionally, you can call a callback function to update the parent component's state
+      // onDoctorDeleted(doctorId);
+    } catch (error) {
+      console.error("Error deleting doctor:", error);
+    }
+  };
 
   const formatFeesToLebaneseLira = (fees) => {
     return Intl.NumberFormat("en-LB", {
@@ -110,10 +124,16 @@ const DoctorCard = ({ doctorId, doctor, onDoctorEdited }) => {
                 sx={{ color: "#2c33f2", fontSize: "1.5rem", cursor: "pointer" }}
               />
             </button>
-            <DeleteRoundedIcon
-              className="doctor-card-delete-icon"
-              sx={{ color: "#ff0000", fontSize: "1.5rem", cursor: "pointer" }}
-            />
+            <button
+              type="button"
+              className="doctor-card-delete-button"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              <DeleteRoundedIcon
+                className="doctor-card-delete-icon"
+                sx={{ color: "#ff0000", fontSize: "1.5rem", cursor: "pointer" }}
+              />
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -122,6 +142,15 @@ const DoctorCard = ({ doctorId, doctor, onDoctorEdited }) => {
         onClose={() => setIsEditModalOpen(false)}
         id={doctorId}
         onDoctorEdited={onDoctorEdited}
+      />
+      <DeleteDoctorConfirm
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        doctorName={doctor.name}
+        onConfirm={() => {
+          handleDeleteDoctor();
+        }}
+        onDoctorDeleted={onDoctorDeleted}
       />
     </>
   );

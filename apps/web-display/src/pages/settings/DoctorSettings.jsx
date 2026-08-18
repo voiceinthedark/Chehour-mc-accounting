@@ -48,6 +48,10 @@ const DoctorSettings = () => {
     setIsModalOpen(false);
   };
 
+  const handleDoctorDeleted = () => {
+    fetchDoctors(); // Refresh the list of doctors after deleting
+  };
+
   // Fetch services from the backend API
   useEffect(() => {
     const fetchServices = async () => {
@@ -96,6 +100,7 @@ const DoctorSettings = () => {
               doctor={doctor}
               services={services}
               onDoctorEdited={handleDoctorEdited}
+              onDoctorDeleted={handleDoctorDeleted}
             />
           ))}
         </Box>
