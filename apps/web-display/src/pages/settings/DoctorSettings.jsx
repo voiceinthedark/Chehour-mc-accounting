@@ -52,13 +52,14 @@ const DoctorSettings = () => {
             setIsModalOpen(true);
           }}
         >
-          <PersonAdd style={{ marginRight: "8px" }} />
+          <PersonAdd style={{ marginRight: "8px", color: "#fff" }} />
           <Typography
             variant="body1"
             style={{
               fontFamily: "Almarai, sans-serif",
               fontWeight: "bold",
               fontSize: "26px",
+              color: "#fff",
             }}
           >
             إضافة طبيب جديد

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Modal,
   Box,
@@ -6,8 +6,14 @@ import {
   TextField,
   Button,
   Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  IconButton,
 } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 import NumberField from "../Inputs/NumberField";
+import { toast } from "react-hot-toast";
 import "@fontsource/almarai";
 import axios from "axios";
 import "./addNewDoctorModal.scss";
@@ -17,15 +23,52 @@ const AddNewDoctorModal = ({ open, onClose, services }) => {
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
 
+  // Per-service split state
+  const [selectedService, setSelectedService] = useState("");
+  const [splitType, setSplitType] = useState("FLAT");
+  const [splitValue, setSplitValue] = useState("");
+  const [serviceSplits, setServiceSplits] = useState([]);
+
+  const handleAddSplit = () => {
+    if (!selectedService || !splitValue) return;
+    const alreadyAdded = serviceSplits.some(
+      (s) => s.serviceId === selectedService,
+    );
+    if (alreadyAdded) return;
+    setServiceSplits((prev) => [
+      ...prev,
+      {
+        serviceId: selectedService,
+        splitType,
+        splitValue:
+          splitType === "PERCENT"
+            ? parseFloat(splitValue) / 100
+            : parseFloat(splitValue),
+      },
+    ]);
+    setSelectedService("");
+    setSplitType("FLAT");
+    setSplitValue("");
+  };
+
+  const handleRemoveSplit = (serviceId) => {
+    setServiceSplits((prev) => prev.filter((s) => s.serviceId !== serviceId));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await axios.post("/api/reception/doctors/new", {
       name: doctorName,
-      patientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
-      visitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
+      perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
+      perVisitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
+      serviceSplits,
     });
     onClose();
+    // Add a success toast notification
+    toast.success("تم إضافة الطبيب بنجاح");
   };
+
+  const getServiceName = (id) => services.find((s) => s.id === id)?.name ?? id;
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -35,11 +78,13 @@ const AddNewDoctorModal = ({ open, onClose, services }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 400,
+          width: 480,
           bgcolor: "background.paper",
           border: "2px solid #000",
           boxShadow: 24,
           p: 4,
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         <Typography
@@ -74,60 +119,134 @@ const AddNewDoctorModal = ({ open, onClose, services }) => {
             sx={{ mb: 2 }}
             placeholder="1,000,000 ل.ل"
           />
+
           <hr />
           <Typography
             variant="body1"
             style={{ fontFamily: "Almarai, sans-serif", fontWeight: "bold" }}
-            sx={{ mt: 2, mb: 1 }}
+            sx={{ mt: 2, mb: 2 }}
           >
-            الخدمات المتاحة
+            تقسيم الخدمات
           </Typography>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <Select
-              multiple
-              fullWidth
-              value={[]}
-              onChange={() => {}}
-              sx={{ mb: 2 }}
-              displayEmpty
-            >
-              {services.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.name}
-                </option>
-              ))}
-            </Select>
-            <NumberField
-              label="قيم الخدمة للطبيب"
-              fullWidth
-              value={""}
-              onChange={() => {}}
-              sx={{ mb: 2 }}
-              placeholder="1,000,000 ل.ل"
-            />
-          </div>
 
-          <Button type="submit" variant="contained" color="primary">
-            <Typography
-              variant="body1"
-              style={{ fontFamily: "Almarai, sans-serif", fontWeight: "bold" }}
+          {/* Added splits list */}
+          {serviceSplits.map((split) => (
+            <Box
+              key={split.serviceId}
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+                p: 1,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+              }}
             >
-              إضافة
-            </Typography>
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={onClose}
-            sx={{ ml: 2 }}
+              <Typography
+                variant="body2"
+                style={{ fontFamily: "Almarai, sans-serif" }}
+              >
+                {getServiceName(split.serviceId)} —{" "}
+                {split.splitType === "PERCENT"
+                  ? `${(split.splitValue * 100).toFixed(0)}%`
+                  : `${split.splitValue.toLocaleString()} ل.ل`}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => handleRemoveSplit(split.serviceId)}
+              >
+                <Delete fontSize="small" />
+              </IconButton>
+            </Box>
+          ))}
+
+          {/* Add new split row */}
+          <Box
+            sx={{ display: "flex", gap: 1, mb: 1, alignItems: "flex-start" }}
           >
-            <Typography
-              variant="body1"
-              style={{ fontFamily: "Almarai, sans-serif", fontWeight: "bold" }}
+            <FormControl sx={{ flex: 2 }}>
+              <InputLabel>الخدمة</InputLabel>
+              <Select
+                value={selectedService}
+                label="الخدمة"
+                onChange={(e) => setSelectedService(e.target.value)}
+              >
+                {services
+                  .filter(
+                    (s) => !serviceSplits.some((sp) => sp.serviceId === s.id),
+                  )
+                  .map((service) => (
+                    <MenuItem key={service.id} value={service.id}>
+                      {service.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+            <FormControl sx={{ flex: 1 }}>
+              <InputLabel>النوع</InputLabel>
+              <Select
+                value={splitType}
+                label="النوع"
+                onChange={(e) => setSplitType(e.target.value)}
+              >
+                <MenuItem value="FLAT">مبلغ ثابت</MenuItem>
+                <MenuItem value="PERCENT">نسبة %</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          <Box sx={{ display: "flex", gap: 1, mb: 2, alignItems: "flex-end" }}>
+            <Box sx={{ flex: 2 }}>
+              <NumberField
+                label={
+                  splitType === "PERCENT" ? "النسبة (0-100)" : "المبلغ ل.ل"
+                }
+                value={splitValue}
+                onChange={(value) => setSplitValue(value)}
+                placeholder={
+                  splitType === "PERCENT" ? "e.g. 30" : "1,000,000 ل.ل"
+                }
+              />
+            </Box>
+            <Button
+              variant="outlined"
+              onClick={handleAddSplit}
+              disabled={!selectedService || !splitValue}
+              sx={{ flex: 1, mb: "16px" }}
             >
-              إلغاء
-            </Typography>
-          </Button>
+              <Typography
+                variant="body2"
+                style={{ fontFamily: "Almarai, sans-serif" }}
+              >
+                إضافة خدمة
+              </Typography>
+            </Button>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button type="submit" variant="contained" color="primary">
+              <Typography
+                variant="body1"
+                style={{
+                  fontFamily: "Almarai, sans-serif",
+                  fontWeight: "bold",
+                }}
+              >
+                إضافة
+              </Typography>
+            </Button>
+            <Button variant="contained" color="secondary" onClick={onClose}>
+              <Typography
+                variant="body1"
+                style={{
+                  fontFamily: "Almarai, sans-serif",
+                  fontWeight: "bold",
+                }}
+              >
+                إلغاء
+              </Typography>
+            </Button>
+          </Box>
         </form>
       </Box>
     </Modal>

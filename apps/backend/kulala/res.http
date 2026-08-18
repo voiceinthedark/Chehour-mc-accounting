@@ -29,3 +29,11 @@ content-type: application/json
 
 ### GET SERVICES
 GET http://localhost:4000/api/reception/services
+
+### GET ALL DOCTORS
+GET http://localhost:4000/api/reception/doctors
+
+@id=ec99ee87-8876-4c9c-86fb-24b5db56497f
+
+#### GET DOCTOR BY ID
+GET http://localhost:4000/api/reception/doctors/{{id}}

@@ -182,9 +182,7 @@ async function main() {
   await prisma.service.createMany({
     data: [
       { name: "ECG", price: 400000, doctorSplitPercent: 0.5 },
-      { name: "X-Ray - Part A", price: 700000, doctorSplitPercent: 0 },
-      { name: "X-Ray - Part B", price: 800000, doctorSplitPercent: 0 },
-      { name: "X-Ray - Part C", price: 900000, doctorSplitPercent: 0 },
+      { name: "X-Ray", price: 800000, doctorSplitPercent: 0 },
       { name: "Ultrasound", price: 700000, doctorSplitPercent: 0.4 },
     ],
     skipDuplicates: true,
