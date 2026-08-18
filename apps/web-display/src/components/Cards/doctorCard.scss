@@ -44,6 +44,18 @@
       gap: 1rem;
       margin-top: 1rem;
       margin-bottom: -0.8rem;
+
+      .doctor-card-edit-button {
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+      }
+
+      .doctor-card-delete-button {
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+      }
     }
   }
 }

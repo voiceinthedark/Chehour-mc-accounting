@@ -2,7 +2,12 @@
 
 import { Typography, Box, Pagination } from "@mui/material";
 import "@fontsource/almarai";
-import { useLoaderData, useNavigate, Outlet } from "react-router-dom";
+import {
+  useLoaderData,
+  useNavigate,
+  Outlet,
+  useRevalidator,
+} from "react-router-dom";
 import { useEffect, useState } from "react";
 import { PersonAdd } from "@mui/icons-material";
 import DoctorCard from "../../components/Cards/DoctorCard";
@@ -26,6 +31,8 @@ const DoctorSettings = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+
+  const revalidator = useRevalidator();
 
   useEffect(() => {
     console.log("Loaded data:", data);
@@ -74,7 +81,12 @@ const DoctorSettings = () => {
         </Typography>
         <Box className="doctor-settings-container" component="form">
           {paginatedData.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} services={services} />
+            <DoctorCard
+              key={doctor.id}
+              doctorId={doctor.id}
+              doctor={doctor}
+              services={services}
+            />
           ))}
         </Box>
 
