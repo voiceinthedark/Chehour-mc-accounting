@@ -19,6 +19,16 @@ async function updateDoctorSettings(req, res) {
       });
 
       if (Array.isArray(serviceSplits)) {
+        // Delete any splits that are no longer in the submitted list
+        const incomingServiceIds = serviceSplits.map((s) => s.serviceId);
+        await tx.doctorServiceSplit.deleteMany({
+          where: {
+            doctorId: id,
+            serviceId: { notIn: incomingServiceIds },
+          },
+        });
+
+        // Upsert the remaining/new splits
         for (const split of serviceSplits) {
           await tx.doctorServiceSplit.upsert({
             where: {
@@ -39,6 +49,9 @@ async function updateDoctorSettings(req, res) {
             },
           });
         }
+      } else {
+        // If serviceSplits is not provided, remove all splits for this doctor
+        await tx.doctorServiceSplit.deleteMany({ where: { doctorId: id } });
       }
 
       return doctor;
