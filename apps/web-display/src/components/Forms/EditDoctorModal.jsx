@@ -84,14 +84,15 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
   };
 
   const handleRemoveSplit = (serviceId) => {
-    setServiceSplits((prev) => prev.filter((s) => s.serviceId !== serviceId));
+    setServiceSplits((prev) => {
+      const updatedSplits = prev.filter((s) => s.serviceId !== serviceId);
+      return updatedSplits;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // FIX: Ensure that the fees are sent as numbers, not strings
-      // FIX: Ensure the address of the API endpoint is correct and matches the backend route
       await axios.put(`/api/reception/doctors/${doctorId}/settings`, {
         name: doctorName,
         perPatientFee: parseFloat(
