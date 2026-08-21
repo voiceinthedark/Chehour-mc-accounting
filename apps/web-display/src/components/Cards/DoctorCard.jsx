@@ -13,7 +13,6 @@ import "@fontsource/almarai";
 import "./doctorCard.scss";
 
 const DoctorCard = ({ doctorId, doctor, onDoctorEdited, onDoctorDeleted }) => {
-  //TODO: Add functionality for edit and delete icons
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 

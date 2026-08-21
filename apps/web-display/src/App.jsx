@@ -23,6 +23,17 @@ const doctorLoader = async () => {
   return data;
 };
 
+const serviceLoader = async () => {
+  const response = await fetch(`${API_RECEPTION_URL}/services`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch services");
+  }
+
+  const data = await response.json();
+  return data;
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -59,6 +70,7 @@ const router = createBrowserRouter([
       {
         path: "services",
         element: <ServiceSettings />,
+        loader: serviceLoader, // Load services data when navigating to the services settings page
       },
       {
         path: "doctors",
