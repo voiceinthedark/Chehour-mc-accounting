@@ -22,8 +22,7 @@ const DoctorCard = ({ doctorId, doctor, onDoctorEdited, onDoctorDeleted }) => {
         `http://localhost:4000/api/reception/doctors/${doctorId}`,
       );
       setIsDeleteModalOpen(false);
-      // Optionally, you can call a callback function to update the parent component's state
-      // onDoctorDeleted(doctorId);
+      onDoctorDeleted();
     } catch (error) {
       console.error("Error deleting doctor:", error);
     }

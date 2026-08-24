@@ -27,10 +27,6 @@ const ServiceSettings = () => {
     }
   };
 
-  // BUG: The service list does not update after editing or deleting a service.
-  // The fetchServices function is called, but the state is not updated correctly.
-  // This might be due to the useLoaderData hook not being reactive to changes in the services state.
-  // TODO: Fix the issue with the service list not updating after editing or deleting a service
   const handleServiceEdited = () => {
     fetchServices(); // Refresh the list of services after editing
   };

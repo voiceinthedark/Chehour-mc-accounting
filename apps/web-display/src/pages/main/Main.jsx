@@ -10,6 +10,7 @@ import "@fontsource/almarai"; // Import the Almarai font
 import { Typography } from "@mui/material";
 
 const Main = () => {
+  // TODO: Fetch the data from the backend and display it in the widgets.
   return (
     <div className="main-container">
       <Typography

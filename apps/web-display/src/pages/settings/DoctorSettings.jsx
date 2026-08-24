@@ -3,17 +3,13 @@
 import { Typography, Box, Pagination } from "@mui/material";
 import "@fontsource/almarai";
 import { useLoaderData, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PersonAdd } from "@mui/icons-material";
 import DoctorCard from "../../components/Cards/DoctorCard";
 import AddNewDoctorModal from "../../components/Forms/AddNewDoctorModal";
 import "./doctorSettings.scss";
 
 const DoctorSettings = () => {
-  // TODO: implement adding a new doctor functionality
-
-  const [services, setServices] = useState([]);
-  // Use the useLoaderData hook to access the data loaded by the loader function
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 6; // Number of items to display per page
@@ -52,17 +48,6 @@ const DoctorSettings = () => {
     fetchDoctors(); // Refresh the list of doctors after deleting
   };
 
-  // Fetch services from the backend API
-  useEffect(() => {
-    const fetchServices = async () => {
-      const response = await fetch("/api/reception/services");
-      const data = await response.json();
-      console.log("Fetched services:", data);
-      setServices(data);
-    };
-    fetchServices();
-  }, []);
-
   return (
     <>
       <div className="main-container" style={{ width: "100%" }}>
@@ -98,7 +83,6 @@ const DoctorSettings = () => {
               key={doctor.id}
               doctorId={doctor.id}
               doctor={doctor}
-              services={services}
               onDoctorEdited={handleDoctorEdited}
               onDoctorDeleted={handleDoctorDeleted}
             />
@@ -125,7 +109,6 @@ const DoctorSettings = () => {
             fetchDoctors(); // Refresh the list of doctors after adding a new one
             setIsModalOpen(false);
           }}
-          services={services}
           onDoctorAdded={handleDoctorAdded}
         />
       }

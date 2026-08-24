@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -18,16 +18,26 @@ import "@fontsource/almarai";
 import axios from "axios";
 import "./addNewDoctorModal.scss";
 
-const AddNewDoctorModal = ({ open, onClose, services, onDoctorAdded }) => {
+const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
+  const [services, setServices] = useState([]);
 
   // Per-service split state
   const [selectedService, setSelectedService] = useState("");
   const [splitType, setSplitType] = useState("FLAT");
   const [splitValue, setSplitValue] = useState("");
   const [serviceSplits, setServiceSplits] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      axios
+        .get("/api/reception/services")
+        .then((res) => setServices(res.data))
+        .catch(() => toast.error("فشل تحميل الخدمات"));
+    }
+  }, [open]);
 
   const handleAddSplit = () => {
     if (!selectedService || !splitValue) return;
