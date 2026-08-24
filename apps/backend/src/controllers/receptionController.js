@@ -78,22 +78,52 @@ async function submitMonthlyTally(req, res) {
   } = req.body;
 
   try {
-    const tally = await prisma.monthlyTally.create({
-      data: {
-        doctorId,
-        month,
-        year,
-        totalVisits,
-        regularPatients,
-        charityPatients,
-        serviceLogs: {
-          create: (servicesUsed || []).map((srv) => ({
-            serviceId: srv.serviceId,
-            regularCount: srv.regularCount,
-            charityCount: srv.charityCount,
-          })),
+    // Use upsert so re-submitting the same month updates instead of crashing
+    const tally = await prisma.$transaction(async (tx) => {
+      const existing = await tx.monthlyTally.findUnique({
+        where: { doctorId_month_year: { doctorId, month, year } },
+      });
+
+      if (existing) {
+        // Delete old service logs before replacing them
+        await tx.monthlyServiceLog.deleteMany({
+          where: { tallyId: existing.id },
+        });
+
+        return tx.monthlyTally.update({
+          where: { id: existing.id },
+          data: {
+            totalVisits,
+            regularPatients,
+            charityPatients,
+            serviceLogs: {
+              create: (servicesUsed || []).map((srv) => ({
+                serviceId: srv.serviceId,
+                regularCount: srv.regularCount,
+                charityCount: srv.charityCount,
+              })),
+            },
+          },
+        });
+      }
+
+      return tx.monthlyTally.create({
+        data: {
+          doctorId,
+          month,
+          year,
+          totalVisits,
+          regularPatients,
+          charityPatients,
+          serviceLogs: {
+            create: (servicesUsed || []).map((srv) => ({
+              serviceId: srv.serviceId,
+              regularCount: srv.regularCount,
+              charityCount: srv.charityCount,
+            })),
+          },
         },
-      },
+      });
     });
 
     res.json({ success: true, tally });

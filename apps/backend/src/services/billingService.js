@@ -129,12 +129,6 @@ async function listMonthlyPayouts(year, month) {
   return results;
 }
 
-module.exports = {
-  calculateMonthlyDoctorPayout,
-  confirmDoctorPayout,
-  listMonthlyPayouts,
-};
-
 /**
  * Confirms and finalizes a doctor's payout for a specific month:
  * - Recalculates the amount owed
@@ -170,3 +164,9 @@ async function confirmDoctorPayout(doctorId, year, month) {
 
   return { ...payout, transactionId: transaction.id };
 }
+
+module.exports = {
+  calculateMonthlyDoctorPayout,
+  confirmDoctorPayout,
+  listMonthlyPayouts,
+};
