@@ -5,6 +5,7 @@ import Settings from "./pages/settings/Settings.jsx";
 import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import LabOrders from "./pages/lab/LabOrders.jsx";
+import Ledger from "./pages/ledger/Ledger.jsx";
 import DoctorSettings from "./pages/settings/DoctorSettings.jsx";
 import ServiceSettings from "./pages/settings/ServiceSettings.jsx";
 import AddNewDoctorModal from "./components/Forms/AddNewDoctorModal.jsx";
@@ -49,6 +50,14 @@ const router = createBrowserRouter([
     element: (
       <MainLayout>
         <Billing />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/ledger",
+    element: (
+      <MainLayout>
+        <Ledger />
       </MainLayout>
     ),
   },

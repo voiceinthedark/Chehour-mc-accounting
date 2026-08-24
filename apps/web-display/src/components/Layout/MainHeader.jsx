@@ -24,6 +24,14 @@ const MainHeader = () => {
               الرئيسية
             </Typography>
           </LinkButton>
+          <LinkButton to="/ledger" color="inherit">
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
+            >
+              الدفتر
+            </Typography>
+          </LinkButton>
           <LinkButton to="/lab" color="inherit">
             <Typography
               variant="h6"
