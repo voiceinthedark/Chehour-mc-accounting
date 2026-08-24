@@ -1,6 +1,6 @@
-// filepath: apps/web-display/src/pages/MonthlyEntry.jsx
+// filepath: apps/web-display/src/pages/billing/MonthlyEntry.jsx
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -14,10 +14,25 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import "@fontsource/almarai"; // Import the Almarai font
+import "@fontsource/almarai";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API_BILLING_URL, API_RECEPTION_URL } from "../../apiconfig";
+
+const MONTH_NAMES = [
+  "يناير",
+  "فبراير",
+  "مارس",
+  "أبريل",
+  "مايو",
+  "يونيو",
+  "يوليو",
+  "أغسطس",
+  "سبتمبر",
+  "أكتوبر",
+  "نوفمبر",
+  "ديسمبر",
+];
 
 export default function MonthlyEntry() {
   const [doctors, setDoctors] = useState([]);
@@ -28,37 +43,28 @@ export default function MonthlyEntry() {
   const [perVisitFee, setPerVisitFee] = useState("");
 
   // Monthly Data Entry State
-  const [month, setMonth] = useState(new Date().getMonth() + 1); // Current month (1-12)
-  const [totalVisits, setTotalVisits] = useState(0); // Days they showed up
+  const [month, setMonth] = useState(new Date().getMonth() + 1); // 1-12
+  const [year] = useState(new Date().getFullYear());
+  const [totalVisits, setTotalVisits] = useState(0);
   const [regularPatients, setRegularPatients] = useState(0);
   const [charityPatients, setCharityPatients] = useState(0);
 
-  // Services State
+  // Services State: { serviceId: { regularCount, charityCount } }
   const [services, setServices] = useState([]);
-  const [serviceSplits, setServiceSplits] = useState({}); // { serviceId: { splitType, splitValue } }
+  const [serviceCounts, setServiceCounts] = useState({});
 
-  // Fetch doctors on mount
   useEffect(() => {
     axios
       .get(`${API_RECEPTION_URL}/doctors`)
-      .then((res) => {
-        setDoctors(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching doctors:", error);
-      });
+      .then((res) => setDoctors(res.data))
+      .catch((error) => console.error("Error fetching doctors:", error));
   }, []);
 
   useEffect(() => {
-    // get services from the backend
     axios
       .get(`${API_RECEPTION_URL}/services`)
-      .then((res) => {
-        setServices(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching services:", error);
-      });
+      .then((res) => setServices(res.data))
+      .catch((error) => console.error("Error fetching services:", error));
   }, []);
 
   const handleDoctorChange = (e) => {
@@ -71,29 +77,55 @@ export default function MonthlyEntry() {
     }
   };
 
-  const handleSaveSettings = async () => {
-    // TODO: Add validation for the fee inputs before submission
-    await axios.put(
-      `${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`,
-      {
-        perPatientFee,
-        perVisitFee,
+  const handleServiceCountChange = (serviceId, field, value) => {
+    setServiceCounts((prev) => ({
+      ...prev,
+      [serviceId]: {
+        ...prev[serviceId],
+        [field]: value,
       },
-    );
+    }));
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      await axios.put(
+        `${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`,
+        { perPatientFee, perVisitFee },
+      );
+      toast.success("تم حفظ الاعدادات");
+    } catch (err) {
+      toast.error("فشل حفظ الاعدادات");
+    }
   };
 
   const handleSubmitTally = async () => {
-    // TODO: Add validation for the monthly tally data before submission
-    // collect service usage data
-    await axios.post(`${API_RECEPTION_URL}/monthly-tally`, {
-      doctorId: selectedDoctorId,
-      month,
-      year: new Date().getFullYear(),
-      totalVisits,
-      regularPatients,
-      charityPatients,
-      servicesUsed: [], // Add service state logic here similarly
-    });
+    const servicesUsed = services
+      .filter(
+        (s) =>
+          (serviceCounts[s.id]?.regularCount || 0) > 0 ||
+          (serviceCounts[s.id]?.charityCount || 0) > 0,
+      )
+      .map((s) => ({
+        serviceId: s.id,
+        regularCount: Number(serviceCounts[s.id]?.regularCount || 0),
+        charityCount: Number(serviceCounts[s.id]?.charityCount || 0),
+      }));
+
+    try {
+      await axios.post(`${API_RECEPTION_URL}/monthly-tally`, {
+        doctorId: selectedDoctorId,
+        month,
+        year,
+        totalVisits: Number(totalVisits),
+        regularPatients: Number(regularPatients),
+        charityPatients: Number(charityPatients),
+        servicesUsed,
+      });
+      toast.success("تم حفظ البيانات الشهرية");
+    } catch (err) {
+      toast.error("فشل حفظ البيانات الشهرية");
+    }
   };
 
   return (
@@ -193,17 +225,41 @@ export default function MonthlyEntry() {
               >
                 بيانات شهرية للطبيب
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                {/* Month Selector */}
+                <Grid item xs={12} sm={3}>
+                  <FormControl fullWidth>
+                    <InputLabel sx={{ fontFamily: "Almarai, sans-serif" }}>
+                      الشهر
+                    </InputLabel>
+                    <Select
+                      value={month}
+                      label="الشهر"
+                      onChange={(e) => setMonth(e.target.value)}
+                    >
+                      {MONTH_NAMES.map((name, i) => (
+                        <MenuItem key={i + 1} value={i + 1}>
+                          <Typography
+                            sx={{ fontFamily: "Almarai, sans-serif" }}
+                          >
+                            {name}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
                     label="الزيارات الكلية"
+                    helperText="عدد الأيام التي حضر فيها الطبيب"
                     type="number"
                     value={totalVisits}
                     onChange={(e) => setTotalVisits(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
                     label="عدد المرضى المنتظمين"
@@ -212,73 +268,104 @@ export default function MonthlyEntry() {
                     onChange={(e) => setRegularPatients(e.target.value)}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
-                    label="عدد المرضى الذين تم تغطيتهم"
+                    label="عدد المرضى المغطين"
                     type="number"
                     value={charityPatients}
                     onChange={(e) => setCharityPatients(e.target.value)}
                   />
                 </Grid>
               </Grid>
+
               {/* SERVICES */}
-              <Grid>
-                <Typography
-                  variant="h6"
-                  sx={{ fontFamily: "almarai, sans-serif", marginTop: "1rem" }}
-                  gutterBottom
-                >
-                  الخدمات المستخدمة
-                </Typography>
-                {services.map((service) => (
-                  <Grid container spacing={2} key={service.id}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography
-                        variant="body1"
-                        sx={{ fontFamily: "almarai, sans-serif" }}
-                      >
-                        {service.name}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                      <TextField
-                        fullWidth
-                        label="نوع التقسيم"
-                        value={
-                          serviceSplits[service.id]?.splitType || "default"
-                        }
-                        onChange={(e) =>
-                          setServiceSplits({
-                            ...serviceSplits,
-                            [service.id]: {
-                              ...serviceSplits[service.id],
-                              splitType: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                      <TextField
-                        fullWidth
-                        label="قيمة التقسيم"
-                        type="number"
-                        value={serviceSplits[service.id]?.splitValue || 0}
-                        onChange={(e) =>
-                          setServiceSplits({
-                            ...serviceSplits,
-                            [service.id]: {
-                              ...serviceSplits[service.id],
-                              splitValue: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                ))}
+              <Typography
+                variant="h6"
+                sx={{ fontFamily: "almarai, sans-serif", mt: 1 }}
+                gutterBottom
+              >
+                الخدمات المستخدمة
+              </Typography>
+              <Grid container spacing={1} sx={{ mb: 1 }}>
+                <Grid item xs={6}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontFamily: "Almarai, sans-serif" }}
+                  >
+                    الخدمة
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontFamily: "Almarai, sans-serif" }}
+                  >
+                    عدد مرضى منتظمين
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontFamily: "Almarai, sans-serif" }}
+                  >
+                    عدد مرضى مغطين
+                  </Typography>
+                </Grid>
               </Grid>
+              {services.map((service) => (
+                <Grid container spacing={2} key={service.id} sx={{ mb: 1 }}>
+                  <Grid
+                    item
+                    xs={6}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{ fontFamily: "almarai, sans-serif" }}
+                    >
+                      {service.name}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="منتظمين"
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      value={serviceCounts[service.id]?.regularCount || ""}
+                      onChange={(e) =>
+                        handleServiceCountChange(
+                          service.id,
+                          "regularCount",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={3}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="مغطين"
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      value={serviceCounts[service.id]?.charityCount || ""}
+                      onChange={(e) =>
+                        handleServiceCountChange(
+                          service.id,
+                          "charityCount",
+                          e.target.value,
+                        )
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              ))}
 
               <Divider sx={{ my: 3 }} />
 
