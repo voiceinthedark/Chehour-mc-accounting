@@ -123,6 +123,8 @@ function DoctorPayoutsTab() {
   const [loading, setLoading] = useState(false);
 
   const [deletingId, setDeletingId] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
@@ -181,18 +183,31 @@ function DoctorPayoutsTab() {
     }
   };
 
-  const handleDeleteTransaction = async (tallyId) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا التقرير الشهري؟")) return;
-    setDeletingId(tallyId);
+  const handleDeleteClick = (tallyId) => {
+    setPendingDeleteId(tallyId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    setDeleteConfirmOpen(false);
+    setDeletingId(pendingDeleteId);
     try {
-      await axios.delete(`${API_RECEPTION_URL}/monthly-tally/${tallyId}`);
+      await axios.delete(
+        `${API_RECEPTION_URL}/monthly-tally/${pendingDeleteId}`,
+      );
       toast.success("تم حذف التقرير الشهري بنجاح");
       fetchPayouts();
     } catch {
       toast.error("فشل حذف التقرير الشهري");
     } finally {
       setDeletingId(null);
+      setPendingDeleteId(null);
     }
+  };
+
+  const handleDeleteCancelled = () => {
+    setDeleteConfirmOpen(false);
+    setPendingDeleteId(null);
   };
 
   return (
@@ -328,7 +343,7 @@ function DoctorPayoutsTab() {
                         variant="outlined"
                         color="error"
                         disabled={deletingId === row.tallyId}
-                        onClick={() => handleDeleteTransaction(row.tallyId)}
+                        onClick={() => handleDeleteClick(row.tallyId)}
                         sx={{ ml: 1 }}
                       >
                         <Typography
@@ -553,6 +568,41 @@ function DoctorPayoutsTab() {
               </Typography>
             </Button>
           )}
+        </DialogActions>
+      </Dialog>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleDeleteCancelled}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontFamily: "Almarai, sans-serif" }}>
+          تأكيد الحذف
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+            هل أنت متأكد من حذف هذا التقرير الشهري؟ لا يمكن التراجع عن هذا
+            الإجراء.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDeleteCancelled}
+            sx={{ fontFamily: "Almarai, sans-serif" }}
+          >
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteConfirmed}
+          >
+            <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+              حذف
+            </Typography>
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
