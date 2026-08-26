@@ -20,7 +20,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   });
 
   if (!tally || tally.isPaidOut)
-    return { totalOwed: "0.00", message: "No unpaid tally for this month." };
+    return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
 
   const doctor = tally.doctor;
   const totalVisits = tally.totalVisits;

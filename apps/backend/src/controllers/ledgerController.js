@@ -8,7 +8,12 @@ const {
 async function createLedgerTransaction(req, res) {
   const { amount, isOutflow, category, description, date } = req.body;
 
-  if (amount === undefined || isOutflow === undefined || !category || !description) {
+  if (
+    amount === undefined ||
+    isOutflow === undefined ||
+    !category ||
+    !description
+  ) {
     return res.status(400).json({
       error: "amount, isOutflow, category, and description are required",
     });
@@ -24,7 +29,10 @@ async function createLedgerTransaction(req, res) {
     });
     res.json({ success: true, transaction });
   } catch (error) {
-    res.status(500).json({ error: "Failed to record transaction" });
+    console.error("Ledger transaction error:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to record transaction", detail: error.message });
   }
 }
 
@@ -32,7 +40,11 @@ async function getLedgerTransactions(req, res) {
   const { startDate, endDate, category } = req.query;
 
   try {
-    const transactions = await listTransactions({ startDate, endDate, category });
+    const transactions = await listTransactions({
+      startDate,
+      endDate,
+      category,
+    });
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch transactions" });

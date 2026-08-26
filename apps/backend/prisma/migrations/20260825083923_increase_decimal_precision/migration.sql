@@ -1,0 +1,16 @@
+-- AlterTable
+ALTER TABLE "Doctor" ALTER COLUMN "perPatientFee" SET DATA TYPE DECIMAL(20,2),
+ALTER COLUMN "perVisitFee" SET DATA TYPE DECIMAL(20,2);
+
+-- AlterTable
+ALTER TABLE "DoctorServiceSplit" ALTER COLUMN "splitValue" SET DATA TYPE DECIMAL(20,2);
+
+-- AlterTable
+ALTER TABLE "LabOrder" ALTER COLUMN "labCost" SET DATA TYPE DECIMAL(20,2),
+ALTER COLUMN "centerCharge" SET DATA TYPE DECIMAL(20,2);
+
+-- AlterTable
+ALTER TABLE "LedgerTransaction" ALTER COLUMN "amount" SET DATA TYPE DECIMAL(20,2);
+
+-- AlterTable
+ALTER TABLE "Service" ALTER COLUMN "price" SET DATA TYPE DECIMAL(20,2);
