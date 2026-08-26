@@ -119,6 +119,7 @@ async function listMonthlyPayouts(year, month) {
       month,
     );
     results.push({
+      tallyId: tally.id,
       doctorId: tally.doctorId,
       doctorName: tally.doctor.name,
       isPaidOut: tally.isPaidOut,
