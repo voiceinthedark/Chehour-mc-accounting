@@ -426,7 +426,11 @@ export default function Ledger() {
               {transactions.map((tx) => (
                 <TableRow key={tx.id} hover>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontFamily: "Almarai, sans-serif" }}
+                    >
                       {new Date(tx.date).toLocaleDateString("ar-LB", {
                         year: "numeric",
                         month: "short",
@@ -435,9 +439,7 @@ export default function Ledger() {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography
-                      sx={{ fontFamily: "Almarai, sans-serif" }}
-                    >
+                    <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
                       {tx.description}
                     </Typography>
                   </TableCell>

@@ -73,7 +73,7 @@ const AddNewServiceModal = ({ open, onClose, onServiceAdded }) => {
         />
         <TextField
           fullWidth
-          label="نسبة الطبيب (%)"
+          label="نسبة الطبيب ( 0-1 %)"
           type="number"
           value={doctorSplitPercent}
           onChange={(e) => setDoctorSplitPercent(e.target.value)}

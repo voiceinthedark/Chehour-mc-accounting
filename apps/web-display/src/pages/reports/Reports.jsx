@@ -39,18 +39,18 @@ import {
 } from "../../apiconfig";
 
 const MONTH_NAMES = [
-  "يناير",
-  "فبراير",
-  "مارس",
-  "أبريل",
-  "مايو",
-  "يونيو",
-  "يوليو",
-  "أغسطس",
-  "سبتمبر",
-  "أكتوبر",
-  "نوفمبر",
-  "ديسمبر",
+  "كانون الثاني",
+  "شباط",
+  "آذار",
+  "نيسان",
+  "أيار",
+  "حزيران",
+  "تموز",
+  "آب",
+  "أيلول",
+  "تشرين الأول",
+  "تشرين الثاني",
+  "كانون الأول",
 ];
 
 const CATEGORY_LABELS = {
@@ -122,6 +122,8 @@ function DoctorPayoutsTab() {
   const [payouts, setPayouts] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [deletingId, setDeletingId] = useState(null);
+
   // Detail dialog
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState(null);
@@ -176,6 +178,20 @@ function DoctorPayoutsTab() {
       toast.error("فشل تأكيد الدفع");
     } finally {
       setConfirmingId(null);
+    }
+  };
+
+  const handleDeleteTransaction = async (tallyId) => {
+    if (!window.confirm("هل أنت متأكد من حذف هذا التقرير الشهري؟")) return;
+    setDeletingId(tallyId);
+    try {
+      await axios.delete(`${API_RECEPTION_URL}/monthly-tally/${tallyId}`);
+      toast.success("تم حذف التقرير الشهري بنجاح");
+      fetchPayouts();
+    } catch {
+      toast.error("فشل حذف التقرير الشهري");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -306,6 +322,23 @@ function DoctorPayoutsTab() {
                         عرض التفاصيل
                       </Typography>
                     </Button>
+                    {!row.isPaidOut && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        disabled={deletingId === row.tallyId}
+                        onClick={() => handleDeleteTransaction(row.tallyId)}
+                        sx={{ ml: 1 }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{ fontFamily: "Almarai, sans-serif" }}
+                        >
+                          {deletingId === row.tallyId ? "..." : "حذف"}
+                        </Typography>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
