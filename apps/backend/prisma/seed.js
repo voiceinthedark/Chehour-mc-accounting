@@ -184,6 +184,7 @@ async function main() {
       { name: "ECG", price: 400000, doctorSplitPercent: 0.5 },
       { name: "X-Ray", price: 800000, doctorSplitPercent: 0 },
       { name: "Ultrasound", price: 700000, doctorSplitPercent: 0.4 },
+      { name: "Ear Wax Removal", price: 1500000, doctorSplitPercent: 1 },
     ],
     skipDuplicates: true,
   });

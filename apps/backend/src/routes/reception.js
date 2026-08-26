@@ -15,6 +15,7 @@ const {
   getServiceById,
   deleteService,
   deleteDoctorServiceSplit,
+  deleteMonthlyTally,
 } = require("../controllers/receptionController");
 
 // 1. SETTINGS: Update a doctor's fees and service arrangements
@@ -42,7 +43,10 @@ router.get("/services", getServices);
 router.get("/services/:id", getServiceById);
 router.delete("/services/:id", deleteService);
 
-// 8. Remove a doctor-specific service split override
+// 8. Delete an unconfirmed monthly tally
+router.delete("/monthly-tally/:id", deleteMonthlyTally);
+
+// 9. Remove a doctor-specific service split override
 router.delete(
   "/doctors/:doctorId/service-splits/:serviceId",
   deleteDoctorServiceSplit,

@@ -288,6 +288,29 @@ async function deleteDoctorServiceSplit(req, res) {
   }
 }
 
+async function deleteMonthlyTally(req, res) {
+  const { id } = req.params;
+
+  try {
+    const tally = await prisma.monthlyTally.findUnique({ where: { id } });
+
+    if (!tally) {
+      return res.status(404).json({ error: "Monthly tally not found" });
+    }
+
+    if (tally.isPaidOut) {
+      return res.status(409).json({
+        error: "Cannot delete a tally that has already been paid out",
+      });
+    }
+
+    await prisma.monthlyTally.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete monthly tally" });
+  }
+}
+
 module.exports = {
   updateDoctorSettings,
   submitMonthlyTally,
@@ -301,4 +324,5 @@ module.exports = {
   getServiceById,
   deleteService,
   deleteDoctorServiceSplit,
+  deleteMonthlyTally,
 };
