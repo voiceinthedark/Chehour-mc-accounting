@@ -9,7 +9,8 @@ const prisma = new PrismaClient();
  */
 async function updateDoctorSettings(req, res) {
   const { id } = req.params;
-  const { perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } = req.body;
+  const { perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } =
+    req.body;
 
   try {
     const updatedDoctor = await prisma.$transaction(async (tx) => {
@@ -133,12 +134,13 @@ async function submitMonthlyTally(req, res) {
 }
 
 async function addNewDoctor(req, res) {
-  const { name, perPatientFee, perVisitFee, serviceSplits } = req.body;
+  const { name, perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } =
+    req.body;
 
   try {
     const newDoctor = await prisma.$transaction(async (tx) => {
       const doctor = await tx.doctor.create({
-        data: { name, perPatientFee, perVisitFee },
+        data: { name, perPatientFee, doctorPatientCut, perVisitFee },
       });
 
       if (Array.isArray(serviceSplits)) {

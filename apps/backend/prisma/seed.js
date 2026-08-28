@@ -146,7 +146,7 @@ async function main() {
       },
       {
         name: "محمد خليل",
-        perPatientFee: 900000,
+        perPatientFee: 1000000,
         doctorPatientCut: 900000,
         perVisitFee: 0,
       },
