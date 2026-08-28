@@ -92,7 +92,8 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     doctorName: doctor.name,
     stats: {
       totalVisits,
-      totalPatients,
+      totalPatients: tally.regularPatients,
+      charityPatients: tally.charityPatients,
       appliedRule,
     },
     financials: {
