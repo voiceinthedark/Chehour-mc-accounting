@@ -9,13 +9,13 @@ const prisma = new PrismaClient();
  */
 async function updateDoctorSettings(req, res) {
   const { id } = req.params;
-  const { perPatientFee, perVisitFee, serviceSplits } = req.body;
+  const { perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } = req.body;
 
   try {
     const updatedDoctor = await prisma.$transaction(async (tx) => {
       const doctor = await tx.doctor.update({
         where: { id },
-        data: { perPatientFee, perVisitFee },
+        data: { perPatientFee, doctorPatientCut, perVisitFee },
       });
 
       if (Array.isArray(serviceSplits)) {

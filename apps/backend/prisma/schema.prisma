@@ -12,10 +12,11 @@ generator client {
 // ==========================================
 
 model Doctor {
-  id            String  @id @default(uuid())
-  name          String
-  perPatientFee Decimal @db.Decimal(20, 2)
-  perVisitFee   Decimal @db.Decimal(20, 2)
+  id               String  @id @default(uuid())
+  name             String
+  perPatientFee    Decimal @db.Decimal(20, 2) // What the CENTER collects per patient
+  doctorPatientCut Decimal @db.Decimal(20, 2) // What the DOCTOR receives per patient
+  perVisitFee      Decimal @db.Decimal(20, 2) // Guaranteed daily rate (used when avg patients < 5/day)
 
   tallies       MonthlyTally[]
   serviceSplits DoctorServiceSplit[]

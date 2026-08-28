@@ -34,11 +34,46 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   let servicePayout = new Decimal(0);
   let totalCharityCost = new Decimal(0);
 
-  // 2. Track the charity cost for consultations
-  if (tally.charityPatients > 0) {
-    totalCharityCost = totalCharityCost.plus(
-      new Decimal(doctor.perPatientFee).mul(tally.charityPatients),
+  // 2. Determine the consultation pay rule first, so charity cost is computed correctly
+  const isPerVisitDoctor = new Decimal(doctor.perVisitFee).gt(0);
+  const patientsForRuleCheck = isPerVisitDoctor
+    ? tally.regularPatients
+    : totalPatients;
+
+  // doctorPatientCut: what the doctor earns per patient (may differ from perPatientFee
+  // which is the center's collection rate)
+  const doctorPatientCut = new Decimal(
+    doctor.doctorPatientCut ?? doctor.perPatientFee,
+  );
+  const centerPatientFee = new Decimal(doctor.perPatientFee);
+
+  let consultationPay = new Decimal(0);
+  let appliedRule = "";
+
+  if (
+    isPerVisitDoctor &&
+    (totalVisits === 0 || patientsForRuleCheck < totalVisits * 5)
+  ) {
+    // Per-visit rule: doctor is paid per day they showed up
+    consultationPay = new Decimal(doctor.perVisitFee).mul(totalVisits);
+    appliedRule = "PER_VISIT_FEE";
+    // Center's loss = what it pays the doctor minus what it collects from real patients
+    totalCharityCost = consultationPay.minus(
+      centerPatientFee.mul(tally.regularPatients),
     );
+    if (totalCharityCost.lt(0)) totalCharityCost = new Decimal(0);
+    // For stats, only real patients count
+    totalPatients = tally.regularPatients;
+  } else {
+    // Per-patient rule: doctor is paid per patient seen (using doctorPatientCut, not perPatientFee)
+    consultationPay = doctorPatientCut.mul(totalPatients);
+    appliedRule = "PER_PATIENT_FEE";
+    // Center covers the doctor's cut for charity patients
+    if (tally.charityPatients > 0) {
+      totalCharityCost = totalCharityCost.plus(
+        doctorPatientCut.mul(tally.charityPatients),
+      );
+    }
   }
 
   // 3. Process EKG, Echo, etc., for this month
@@ -48,7 +83,6 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
     let doctorCut;
     if (override && override.splitType === "FLAT") {
-      // Doctor gets a fixed amount per service performed, regardless of price
       doctorCut = new Decimal(override.splitValue).mul(totalServices);
     } else {
       const serviceRevenue = new Decimal(log.service.price).mul(totalServices);
@@ -68,32 +102,14 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     }
   });
 
-  // 4. Apply the Monthly Rule for Consultation Pay
-  let consultationPay = new Decimal(0);
-  let appliedRule = "";
-
-  if (
-    new Decimal(doctor.perVisitFee).gt(0) &&
-    (totalVisits === 0 || totalPatients < totalVisits * 5)
-  ) {
-    // Under 5 for the whole month -> Pay them per visit/day
-    consultationPay = new Decimal(doctor.perVisitFee).mul(totalVisits);
-    appliedRule = "PER_VISIT_FEE";
-  } else {
-    // 5 or more for the whole month -> Pay them per patient
-    consultationPay = new Decimal(doctor.perPatientFee).mul(totalPatients);
-    appliedRule = "PER_PATIENT_FEE";
-  }
-
-  // 5. Final Calculation
+  // 4. Final Calculation
   const totalOwed = consultationPay.plus(servicePayout);
 
   return {
     doctorName: doctor.name,
     stats: {
       totalVisits,
-      totalPatients: tally.regularPatients,
-      charityPatients: tally.charityPatients,
+      totalPatients,
       appliedRule,
     },
     financials: {

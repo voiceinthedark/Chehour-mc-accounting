@@ -20,18 +20,18 @@ import { toast } from "react-hot-toast";
 import { API_BILLING_URL, API_RECEPTION_URL } from "../../apiconfig";
 
 const MONTH_NAMES = [
-  "يناير",
-  "فبراير",
-  "مارس",
-  "أبريل",
-  "مايو",
-  "يونيو",
-  "يوليو",
-  "أغسطس",
-  "سبتمبر",
-  "أكتوبر",
-  "نوفمبر",
-  "ديسمبر",
+  "كانون الثاني",
+  "شباط",
+  "آذار",
+  "نيسان",
+  "أيار",
+  "حزيران",
+  "تموز",
+  "آب",
+  "أيلول",
+  "تشرين الأول",
+  "تشرين الثاني",
+  "كانون الأول",
 ];
 
 export default function MonthlyEntry() {
@@ -40,6 +40,7 @@ export default function MonthlyEntry() {
 
   // Settings State
   const [perPatientFee, setPerPatientFee] = useState("");
+  const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [perVisitFee, setPerVisitFee] = useState("");
 
   // Monthly Data Entry State
@@ -73,6 +74,7 @@ export default function MonthlyEntry() {
     const doc = doctors.find((d) => d.id === docId);
     if (doc) {
       setPerPatientFee(doc.perPatientFee);
+      setDoctorPatientCut(doc.doctorPatientCut);
       setPerVisitFee(doc.perVisitFee);
     }
   };
@@ -91,7 +93,7 @@ export default function MonthlyEntry() {
     try {
       await axios.put(
         `${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`,
-        { perPatientFee, perVisitFee },
+        { perPatientFee, doctorPatientCut, perVisitFee },
       );
       toast.success("تم حفظ الاعدادات");
     } catch (err) {
@@ -183,10 +185,21 @@ export default function MonthlyEntry() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="تعرفة لكل مريض (ل.ل)"
+                    label="تعرفة المركز للمريض (ل.ل)"
+                    helperText="المبلغ الذي يدفعه المريض للمركز"
                     type="number"
                     value={perPatientFee}
                     onChange={(e) => setPerPatientFee(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="حصة الطبيب من كل مريض (ل.ل)"
+                    helperText="المبلغ الذي يتقاضاه الطبيب لكل مريض"
+                    type="number"
+                    value={doctorPatientCut}
+                    onChange={(e) => setDoctorPatientCut(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
