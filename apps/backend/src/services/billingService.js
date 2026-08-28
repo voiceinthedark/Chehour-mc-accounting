@@ -72,7 +72,10 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   let consultationPay = new Decimal(0);
   let appliedRule = "";
 
-  if (totalPatients < 5) {
+  if (
+    new Decimal(doctor.perVisitFee).gt(0) &&
+    (totalVisits === 0 || totalPatients < totalVisits * 5)
+  ) {
     // Under 5 for the whole month -> Pay them per visit/day
     consultationPay = new Decimal(doctor.perVisitFee).mul(totalVisits);
     appliedRule = "PER_VISIT_FEE";
