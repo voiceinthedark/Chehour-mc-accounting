@@ -2,7 +2,7 @@
 
 import { Typography, Box, Pagination } from "@mui/material";
 import "@fontsource/almarai";
-import { useLoaderData, Outlet } from "react-router-dom";
+import { useEffect } from "react";
 import { useState } from "react";
 import { PersonAdd } from "@mui/icons-material";
 import DoctorCard from "../../components/Cards/DoctorCard";
@@ -13,8 +13,7 @@ const DoctorSettings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 6; // Number of items to display per page
-  const loaderData = useLoaderData();
-  const [doctors, setDoctors] = useState(loaderData);
+  const [doctors, setDoctors] = useState([]);
 
   const paginatedData = doctors.slice(
     (currentPage - 1) * itemsPerPage,
@@ -34,8 +33,12 @@ const DoctorSettings = () => {
     }
   };
 
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
   const handleDoctorEdited = () => {
-    fetchDoctors(); // Refresh the list of doctors after editing
+    fetchDoctors();
     setIsModalOpen(false);
   };
 
@@ -51,6 +54,13 @@ const DoctorSettings = () => {
   return (
     <>
       <div className="main-container" style={{ width: "100%" }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          style={{ fontFamily: "Almarai, sans-serif", marginBottom: "20px" }}
+        >
+          إعدادات الأطباء
+        </Typography>
         <Box
           className="add-new-doctor-button"
           onClick={() => {
@@ -70,13 +80,6 @@ const DoctorSettings = () => {
             إضافة طبيب جديد
           </Typography>
         </Box>
-        <Typography
-          variant="h3"
-          component="h1"
-          style={{ fontFamily: "Almarai, sans-serif", marginBottom: "20px" }}
-        >
-          إعدادات الأطباء
-        </Typography>
         <Box className="doctor-settings-container" component="form">
           {paginatedData.map((doctor) => (
             <DoctorCard
@@ -101,7 +104,6 @@ const DoctorSettings = () => {
           }}
         />
       </div>
-      <Outlet />
       {
         <AddNewDoctorModal
           open={isModalOpen}

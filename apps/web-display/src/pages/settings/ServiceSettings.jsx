@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Typography, Button } from "@mui/material";
-import { useLoaderData, Outlet } from "react-router-dom";
 import "@fontsource/almarai"; // Import the Almarai font
 import ServiceList from "../../components/Cards/ServiceList";
 import AddNewServiceModal from "../../components/Forms/AddNewServiceModal";
@@ -10,8 +9,7 @@ import { Add } from "@mui/icons-material";
 import { API_RECEPTION_URL } from "../../apiconfig.js";
 
 const ServiceSettings = () => {
-  const loaderData = useLoaderData();
-  const [services, setServices] = useState(loaderData);
+  const [services, setServices] = useState([]);
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
 
   const fetchServices = async () => {
@@ -83,7 +81,6 @@ const ServiceSettings = () => {
           onDelete={handleServiceDeleted}
         />
       </div>
-      <Outlet />
       <AddNewServiceModal
         open={isAddServiceModalOpen}
         onClose={() => setIsAddServiceModalOpen(false)}

@@ -6,35 +6,9 @@ import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import LabOrders from "./pages/lab/LabOrders.jsx";
 import Ledger from "./pages/ledger/Ledger.jsx";
-import DoctorSettings from "./pages/settings/DoctorSettings.jsx";
-import ServiceSettings from "./pages/settings/ServiceSettings.jsx";
-import AddNewDoctorModal from "./components/Forms/AddNewDoctorModal.jsx";
-import { API_RECEPTION_URL } from "./apiconfig.js";
 import "./App.css";
 
 import { Toaster } from "react-hot-toast";
-
-const doctorLoader = async () => {
-  const response = await fetch(`${API_RECEPTION_URL}/doctors`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch doctors");
-  }
-
-  const data = await response.json();
-  return data;
-};
-
-const serviceLoader = async () => {
-  const response = await fetch(`${API_RECEPTION_URL}/services`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch services");
-  }
-
-  const data = await response.json();
-  return data;
-};
 
 const router = createBrowserRouter([
   {
@@ -84,24 +58,6 @@ const router = createBrowserRouter([
         <Settings />
       </MainLayout>
     ),
-    children: [
-      {
-        path: "services",
-        element: <ServiceSettings />,
-        loader: serviceLoader, // Load services data when navigating to the services settings page
-      },
-      {
-        path: "doctors",
-        element: <DoctorSettings />,
-        loader: doctorLoader,
-        children: [
-          {
-            path: "add",
-            element: <AddNewDoctorModal />,
-          },
-        ],
-      },
-    ],
   },
 ]);
 

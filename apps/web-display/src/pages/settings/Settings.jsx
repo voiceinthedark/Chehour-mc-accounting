@@ -1,36 +1,50 @@
-// filepath: apps/web-display/src/pages/settings/Settings.jsx
-
-import { Outlet } from "react-router-dom";
-import { Typography } from "@mui/material";
-import "@fontsource/almarai"; // Import the Almarai font
-import LargeLinkButton from "../../components/Links/LargeLinkButton";
-import "./settings.scss";
+import { useState } from "react";
+import { Typography, Tabs, Tab, Box } from "@mui/material";
+import "@fontsource/almarai";
+import DoctorSettings from "./DoctorSettings";
+import ServiceSettings from "./ServiceSettings";
 
 const Settings = () => {
+  const [activeTab, setActiveTab] = useState(0);
+
   return (
-    <>
-      <div className="settings-buttons">
-        <LargeLinkButton to="/settings/services">
-          <Typography
-            variant="h5"
-            component="h2"
-            style={{ fontFamily: "Almarai, sans-serif" }}
-          >
-            إعدادات الخدمات
-          </Typography>
-        </LargeLinkButton>
-        <LargeLinkButton to="/settings/doctors">
-          <Typography
-            variant="h5"
-            component="h2"
-            style={{ fontFamily: "Almarai, sans-serif" }}
-          >
-            إعدادات الأطباء
-          </Typography>
-        </LargeLinkButton>
-      </div>
-      <Outlet />
-    </>
+    <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ fontFamily: "Almarai, sans-serif" }}
+      >
+        الإعدادات
+      </Typography>
+
+      <Tabs
+        value={activeTab}
+        onChange={(_, v) => setActiveTab(v)}
+        sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
+      >
+        <Tab
+          label={
+            <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+              إعدادات الخدمات
+            </Typography>
+          }
+        />
+        <Tab
+          label={
+            <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+              إعدادات الأطباء
+            </Typography>
+          }
+        />
+      </Tabs>
+
+      <Box hidden={activeTab !== 0}>
+        {activeTab === 0 && <ServiceSettings />}
+      </Box>
+      <Box hidden={activeTab !== 1}>
+        {activeTab === 1 && <DoctorSettings />}
+      </Box>
+    </div>
   );
 };
 
