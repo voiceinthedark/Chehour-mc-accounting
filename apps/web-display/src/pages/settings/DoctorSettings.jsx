@@ -5,9 +5,32 @@ import "@fontsource/almarai";
 import { useEffect } from "react";
 import { useState } from "react";
 import { PersonAdd } from "@mui/icons-material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
+import rtlPlugin from "stylis-plugin-rtl";
+import { prefixer } from "stylis";
 import DoctorCard from "../../components/Cards/DoctorCard";
 import AddNewDoctorModal from "../../components/Forms/AddNewDoctorModal";
 import "./doctorSettings.scss";
+
+const cacheRtl = createCache({
+  key: "muirtl",
+  stylisPlugins: [prefixer, rtlPlugin],
+});
+
+const theme = createTheme({
+  direction: "rtl", // Set the direction to right-to-left
+});
 
 const DoctorSettings = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,17 +103,115 @@ const DoctorSettings = () => {
             إضافة طبيب جديد
           </Typography>
         </Box>
-        <Box className="doctor-settings-container" component="form">
-          {paginatedData.map((doctor) => (
-            <DoctorCard
-              key={doctor.id}
-              doctorId={doctor.id}
-              doctor={doctor}
-              onDoctorEdited={handleDoctorEdited}
-              onDoctorDeleted={handleDoctorDeleted}
-            />
-          ))}
-        </Box>
+        <CacheProvider value={cacheRtl}>
+          <ThemeProvider theme={theme}>
+            <div dir="rtl" style={{ width: "100%" }}>
+              <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+                <Table aria-label="doctor table" style={{ minWidth: 650 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        style={{
+                          fontFamily: "Almarai, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: "18px",
+                        }}
+                      >
+                        اسم الطبيب
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          fontFamily: "Almarai, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: "18px",
+                        }}
+                      >
+                        رسوم المريض
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          fontFamily: "Almarai, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: "18px",
+                        }}
+                      >
+                        نسبة الطبيب من المريض
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          fontFamily: "Almarai, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: "18px",
+                        }}
+                      >
+                        الخدمات
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          fontFamily: "Almarai, sans-serif",
+                          fontWeight: "bold",
+                          fontSize: "18px",
+                        }}
+                      >
+                        الإعدادات
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedData.map((doctor) => (
+                      <TableRow key={doctor.id}>
+                        <TableCell>
+                          <Typography
+                            variant="body1"
+                            style={{
+                              fontFamily: "Almarai, sans-serif",
+                              fontSize: "16px",
+                            }}
+                          >
+                            {doctor.name}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body1"
+                            style={{
+                              fontFamily: "Almarai, sans-serif",
+                              fontSize: "16px",
+                            }}
+                          >
+                            {doctor.perPatientFee.toLocaleString()} ل.ل
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body1"
+                            style={{
+                              fontFamily: "Almarai, sans-serif",
+                              fontSize: "16px",
+                            }}
+                          >
+                            {doctor.doctorPatientCut.toLocaleString()} ل.ل
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body1"
+                            style={{
+                              fontFamily: "Almarai, sans-serif",
+                              fontSize: "16px",
+                            }}
+                          >
+                            الإعدادات
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          </ThemeProvider>
+        </CacheProvider>
 
         <Pagination
           count={Math.ceil(doctors.length / itemsPerPage)}
