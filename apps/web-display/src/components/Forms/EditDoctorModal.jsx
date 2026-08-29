@@ -22,6 +22,7 @@ import "@fontsource/almarai";
 const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
+  const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
   const [doctorId, setDoctorId] = useState("");
   const [services, setServices] = useState([]);
@@ -53,6 +54,7 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
           const doctorData = response.data;
           setDoctorName(doctorData.name);
           setDoctorPatientFee(doctorData.perPatientFee);
+          setDoctorPatientCut(doctorData.doctorPatientCut);
           setDoctorVisitFee(doctorData.perVisitFee);
           setDoctorId(doctorData.id);
           setServiceSplits(doctorData.serviceSplits ?? []);
@@ -97,6 +99,9 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
         name: doctorName,
         perPatientFee: parseFloat(
           String(doctorPatientFee).replace(/[^0-9.-]+/g, ""),
+        ),
+        doctorPatientCut: parseFloat(
+          String(doctorPatientCut).replace(/[^0-9.-]+/g, ""),
         ),
         perVisitFee: parseFloat(
           String(doctorVisitFee).replace(/[^0-9.-]+/g, ""),
@@ -154,6 +159,14 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
             fullWidth
             value={doctorPatientFee}
             onChange={(value) => setDoctorPatientFee(value)}
+            sx={{ mb: 2 }}
+            placeholder="1,000,000 ل.ل"
+          />
+          <NumberField
+            label="حصة الطبيب من رسوم المريض"
+            fullWidth
+            value={doctorPatientCut}
+            onChange={(value) => setDoctorPatientCut(value)}
             sx={{ mb: 2 }}
             placeholder="1,000,000 ل.ل"
           />

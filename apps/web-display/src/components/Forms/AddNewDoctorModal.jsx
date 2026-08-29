@@ -21,6 +21,7 @@ import "./addNewDoctorModal.scss";
 const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
+  const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
   const [services, setServices] = useState([]);
 
@@ -71,6 +72,9 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
       await axios.post("/api/reception/doctors/new", {
         name: doctorName,
         perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
+        doctorPatientCut: parseFloat(
+          doctorPatientCut.replace(/[^0-9.-]+/g, ""),
+        ),
         perVisitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
         serviceSplits,
       });
@@ -124,6 +128,14 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
             fullWidth
             value={doctorPatientFee}
             onChange={(value) => setDoctorPatientFee(value)}
+            sx={{ mb: 2 }}
+            placeholder="1,000,000 ل.ل"
+          />
+          <NumberField
+            label="نسبة الطبيب من رسوم المريض"
+            fullWidth
+            value={doctorPatientCut}
+            onChange={(value) => setDoctorPatientCut(value)}
             sx={{ mb: 2 }}
             placeholder="1,000,000 ل.ل"
           />
