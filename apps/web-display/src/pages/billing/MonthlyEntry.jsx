@@ -47,6 +47,7 @@ export default function MonthlyEntry() {
   const [month, setMonth] = useState(new Date().getMonth() + 1); // 1-12
   const [year] = useState(new Date().getFullYear());
   const [totalVisits, setTotalVisits] = useState(0);
+  const [coveredVisits, setCoveredVisits] = useState(0);
   const [regularPatients, setRegularPatients] = useState(0);
   const [charityPatients, setCharityPatients] = useState(0);
 
@@ -120,6 +121,7 @@ export default function MonthlyEntry() {
         month,
         year,
         totalVisits: Number(totalVisits),
+        coveredVisits: Number(coveredVisits),
         regularPatients: Number(regularPatients),
         charityPatients: Number(charityPatients),
         servicesUsed,
@@ -272,6 +274,19 @@ export default function MonthlyEntry() {
                     onChange={(e) => setTotalVisits(e.target.value)}
                   />
                 </Grid>
+                {perVisitFee > 0 && (
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="أيام التغطية"
+                      helperText="أيام كان فيها أقل من 5 مرضى"
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      value={coveredVisits}
+                      onChange={(e) => setCoveredVisits(e.target.value)}
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
@@ -330,7 +345,19 @@ export default function MonthlyEntry() {
                 </Grid>
               </Grid>
               {services.map((service) => (
-                <Grid container spacing={2} key={service.id} sx={{ mb: 1 }}>
+                <Grid
+                  columnSpacing={2}
+                  container
+                  spacing={3}
+                  key={service.id}
+                  sx={{
+                    mb: 1,
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
+                >
                   <Grid
                     item
                     xs={6}
@@ -338,12 +365,23 @@ export default function MonthlyEntry() {
                   >
                     <Typography
                       variant="body1"
-                      sx={{ fontFamily: "almarai, sans-serif" }}
+                      sx={{
+                        rontFamily: "almarai, sans-serif",
+                        fontWeight: "bold",
+                      }}
                     >
                       {service.name}
                     </Typography>
                   </Grid>
-                  <Grid item xs={3}>
+                  <Grid
+                    item
+                    xs={3}
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "flex-end",
+                    }}
+                  >
                     <TextField
                       fullWidth
                       size="small"

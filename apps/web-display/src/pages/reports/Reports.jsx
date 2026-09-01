@@ -429,12 +429,16 @@ function DoctorPayoutsTab() {
                         color={
                           detailData.stats.appliedRule === "PER_VISIT_FEE"
                             ? "warning"
-                            : "primary"
+                            : detailData.stats.appliedRule === "MIXED"
+                              ? "secondary"
+                              : "primary"
                         }
                         label={
                           detailData.stats.appliedRule === "PER_VISIT_FEE"
                             ? "تعرفة زيارة"
-                            : "تعرفة مريض"
+                            : detailData.stats.appliedRule === "MIXED"
+                              ? "مختلطة"
+                              : "تعرفة مريض"
                         }
                       />
                       <Typography
