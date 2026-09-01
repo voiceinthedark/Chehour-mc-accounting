@@ -123,6 +123,13 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   // 4. Final Calculation
   const totalOwed = consultationPay.plus(servicePayout);
 
+  // Net gain/loss for the center from consultations only
+  // (paying patients = regularPatients + coveredPatients; charity patients don't pay)
+  const coveredPatientsCount = tally.coveredPatients ?? 0;
+  const centerConsultationNet = centerPatientFee
+    .mul(tally.regularPatients + coveredPatientsCount)
+    .minus(consultationPay);
+
   return {
     doctorName: doctor.name,
     stats: {
@@ -135,6 +142,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
       servicePay: servicePayout.toFixed(2),
       totalOwed: totalOwed.toFixed(2),
       charityCostToCenter: totalCharityCost.toFixed(2),
+      centerConsultationNet: centerConsultationNet.toFixed(2),
     },
   };
 }
