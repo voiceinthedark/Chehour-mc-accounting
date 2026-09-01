@@ -74,6 +74,7 @@ async function submitMonthlyTally(req, res) {
     year,
     totalVisits,
     coveredVisits,
+    coveredPatients,
     regularPatients,
     charityPatients,
     servicesUsed,
@@ -97,6 +98,7 @@ async function submitMonthlyTally(req, res) {
           data: {
             totalVisits,
             coveredVisits: coveredVisits ?? 0,
+            coveredPatients: coveredPatients ?? 0,
             regularPatients,
             charityPatients,
             serviceLogs: {
@@ -117,6 +119,7 @@ async function submitMonthlyTally(req, res) {
           year,
           totalVisits,
           coveredVisits: coveredVisits ?? 0,
+          coveredPatients: coveredPatients ?? 0,
           regularPatients,
           charityPatients,
           serviceLogs: {

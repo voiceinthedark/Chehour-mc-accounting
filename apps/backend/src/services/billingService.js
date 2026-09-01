@@ -54,8 +54,14 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     const patientPay = doctorPatientCut.mul(totalPatients);
     consultationPay = guaranteedPay.plus(patientPay);
     appliedRule = "MIXED";
-    // Center absorbs the guaranteed-visit cost for covered days
-    totalCharityCost = guaranteedPay;
+    // Net cost to center for covered days = what it paid doctor − what it collected from patients those days
+    const coveredPatients = tally.coveredPatients ?? 0;
+    const coveredDayNetCost = guaranteedPay.minus(
+      centerPatientFee.mul(coveredPatients),
+    );
+    totalCharityCost = coveredDayNetCost.gt(0)
+      ? coveredDayNetCost
+      : new Decimal(0);
     // Center also covers the doctor's cut for charity patients on normal days
     if (tally.charityPatients > 0) {
       totalCharityCost = totalCharityCost.plus(
