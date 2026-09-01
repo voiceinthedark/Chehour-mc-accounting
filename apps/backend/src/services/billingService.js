@@ -36,9 +36,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
   // 2. Determine the consultation pay rule first, so charity cost is computed correctly
   const isPerVisitDoctor = new Decimal(doctor.perVisitFee).gt(0);
-  const patientsForRuleCheck = isPerVisitDoctor
-    ? tally.regularPatients
-    : totalPatients;
+  const coveredVisits = tally.coveredVisits ?? 0;
 
   // doctorPatientCut: what the doctor earns per patient (may differ from perPatientFee
   // which is the center's collection rate)
@@ -50,11 +48,25 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
   let consultationPay = new Decimal(0);
   let appliedRule = "";
 
-  if (
+  if (isPerVisitDoctor && coveredVisits > 0) {
+    // Mixed rule: some days were under per-visit (covered), the rest per-patient
+    const guaranteedPay = new Decimal(doctor.perVisitFee).mul(coveredVisits);
+    const patientPay = doctorPatientCut.mul(totalPatients);
+    consultationPay = guaranteedPay.plus(patientPay);
+    appliedRule = "MIXED";
+    // Center absorbs the guaranteed-visit cost for covered days
+    totalCharityCost = guaranteedPay;
+    // Center also covers the doctor's cut for charity patients on normal days
+    if (tally.charityPatients > 0) {
+      totalCharityCost = totalCharityCost.plus(
+        doctorPatientCut.mul(tally.charityPatients),
+      );
+    }
+  } else if (
     isPerVisitDoctor &&
-    (totalVisits === 0 || patientsForRuleCheck < totalVisits * 5)
+    (totalVisits === 0 || totalPatients < totalVisits * 5)
   ) {
-    // Per-visit rule: doctor is paid per day they showed up
+    // Per-visit rule: all visits fell under the threshold — doctor paid per day
     consultationPay = new Decimal(doctor.perVisitFee).mul(totalVisits);
     appliedRule = "PER_VISIT_FEE";
     // Center's loss = what it pays the doctor minus what it collects from real patients

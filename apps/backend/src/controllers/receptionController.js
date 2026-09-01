@@ -73,6 +73,7 @@ async function submitMonthlyTally(req, res) {
     month,
     year,
     totalVisits,
+    coveredVisits,
     regularPatients,
     charityPatients,
     servicesUsed,
@@ -95,6 +96,7 @@ async function submitMonthlyTally(req, res) {
           where: { id: existing.id },
           data: {
             totalVisits,
+            coveredVisits: coveredVisits ?? 0,
             regularPatients,
             charityPatients,
             serviceLogs: {
@@ -114,6 +116,7 @@ async function submitMonthlyTally(req, res) {
           month,
           year,
           totalVisits,
+          coveredVisits: coveredVisits ?? 0,
           regularPatients,
           charityPatients,
           serviceLogs: {

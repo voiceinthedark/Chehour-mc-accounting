@@ -65,7 +65,8 @@ model MonthlyTally {
 
   // Aggregated Volumes
   totalVisits     Int @default(0) // Days the doctor actually showed up
-  regularPatients Int @default(0) // Patients who paid
+  coveredVisits   Int @default(0) // Days where patients < 5 and per-visit fee was applied
+  regularPatients Int @default(0) // Patients who paid (from non-covered days)
   charityPatients Int @default(0) // Patients covered by the center
 
   isPaidOut Boolean @default(false)
