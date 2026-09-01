@@ -532,7 +532,7 @@ function DoctorPayoutsTab() {
                       fontSize: "0.85rem",
                     }}
                   >
-                    تكلفة التغطية على المركز
+                    تكلفة التغطية على المركز في ايام العجز
                   </Typography>
                   <Typography
                     sx={{
@@ -545,6 +545,69 @@ function DoctorPayoutsTab() {
                       detailData.financials.charityCostToCenter,
                     ).toLocaleString()}{" "}
                     ل.ل
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 1,
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor:
+                      Number(detailData.financials.centerConsultationNet) >= 0
+                        ? "#f0fdf4"
+                        : "#fff1f2",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      fontWeight: 700,
+                      color:
+                        Number(detailData.financials.centerConsultationNet) >= 0
+                          ? "success.dark"
+                          : "error.dark",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    صافي المركز من الاستشارات
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      fontWeight: 700,
+                      color:
+                        Number(detailData.financials.centerConsultationNet) >= 0
+                          ? "success.dark"
+                          : "error.dark",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    {Number(
+                      detailData.financials.centerConsultationNet,
+                    ).toLocaleString()}{" "}
+                    ل.ل{" "}
+                    {Number(detailData.financials.centerConsultationNet) >= 0
+                      ? "▲"
+                      : "▼"}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 1,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "text.secondary",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    ملاحظة: تكلفة التغطية على المركز لا تخصم من مستحقات الطبيب
                   </Typography>
                 </Box>
               </Box>
