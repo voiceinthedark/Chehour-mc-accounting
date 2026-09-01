@@ -19,7 +19,12 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
-import DoctorCard from "../../components/Cards/DoctorCard";
+import EditDoctorModal from "../../components/Forms/EditDoctorModal";
+import DeleteDoctorConfirm from "../../components/Forms/DeleteDoctorConfirm";
+import { IconButton } from "@mui/material";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import axios from "axios";
 import AddNewDoctorModal from "../../components/Forms/AddNewDoctorModal";
 import "./doctorSettings.scss";
 
@@ -37,6 +42,8 @@ const DoctorSettings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 6; // Number of items to display per page
   const [doctors, setDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null); // { id, name }
+  const [modalMode, setModalMode] = useState(null); // 'edit' | 'delete'
 
   const paginatedData = doctors.slice(
     (currentPage - 1) * itemsPerPage,
@@ -74,6 +81,16 @@ const DoctorSettings = () => {
     fetchDoctors(); // Refresh the list of doctors after deleting
   };
 
+  const formatCurrencyToLebanese = (currency) => {
+    // Format the currency to Lebanese Lira format
+    return new Intl.NumberFormat("en-LB", {
+      style: "currency",
+      currency: "LBP",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(currency);
+  };
+
   return (
     <>
       <div className="main-container" style={{ width: "100%" }}>
@@ -108,8 +125,21 @@ const DoctorSettings = () => {
             <div dir="rtl" style={{ width: "100%" }}>
               <TableContainer component={Paper} style={{ marginTop: "20px" }}>
                 <Table aria-label="doctor table" style={{ minWidth: 650 }}>
-                  <TableHead>
-                    <TableRow>
+                  <TableHead
+                    style={{
+                      backgroundColor: "#12a312",
+                      fontweight: "bold",
+                      opacity: 0.9,
+                      color: "#fff",
+                    }}
+                  >
+                    <TableRow
+                      style={{
+                        backgroundColor: "#12a312",
+                        color: "#fff",
+                        fontWeight: "bold",
+                      }}
+                    >
                       <TableCell
                         style={{
                           fontFamily: "Almarai, sans-serif",
@@ -144,7 +174,7 @@ const DoctorSettings = () => {
                           fontSize: "18px",
                         }}
                       >
-                        الخدمات
+                        تعديل
                       </TableCell>
                       <TableCell
                         style={{
@@ -153,7 +183,7 @@ const DoctorSettings = () => {
                           fontSize: "18px",
                         }}
                       >
-                        الإعدادات
+                        حذف
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -176,10 +206,12 @@ const DoctorSettings = () => {
                             variant="body1"
                             style={{
                               fontFamily: "Almarai, sans-serif",
-                              fontSize: "16px",
+                              fontSize: "18px",
                             }}
                           >
-                            {doctor.perPatientFee.toLocaleString()} ل.ل
+                            {formatCurrencyToLebanese(
+                              doctor.perPatientFee.toLocaleString(),
+                            )}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -187,22 +219,39 @@ const DoctorSettings = () => {
                             variant="body1"
                             style={{
                               fontFamily: "Almarai, sans-serif",
-                              fontSize: "16px",
+                              fontSize: "18px",
                             }}
                           >
-                            {doctor.doctorPatientCut.toLocaleString()} ل.ل
+                            {formatCurrencyToLebanese(
+                              doctor.doctorPatientCut.toLocaleString(),
+                            )}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body1"
-                            style={{
-                              fontFamily: "Almarai, sans-serif",
-                              fontSize: "16px",
+                          <IconButton
+                            onClick={() => {
+                              setSelectedDoctor({
+                                id: doctor.id,
+                                name: doctor.name,
+                              });
+                              setModalMode("edit");
                             }}
                           >
-                            الإعدادات
-                          </Typography>
+                            <EditRoundedIcon sx={{ color: "#2c33f2" }} />
+                          </IconButton>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton
+                            onClick={() => {
+                              setSelectedDoctor({
+                                id: doctor.id,
+                                name: doctor.name,
+                              });
+                              setModalMode("delete");
+                            }}
+                          >
+                            <DeleteRoundedIcon sx={{ color: "#ff0000" }} />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -225,16 +274,36 @@ const DoctorSettings = () => {
           }}
         />
       </div>
-      {
-        <AddNewDoctorModal
-          open={isModalOpen}
-          onClose={() => {
-            fetchDoctors(); // Refresh the list of doctors after adding a new one
-            setIsModalOpen(false);
-          }}
-          onDoctorAdded={handleDoctorAdded}
-        />
-      }
+      <AddNewDoctorModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onDoctorAdded={handleDoctorAdded}
+      />
+      <EditDoctorModal
+        open={modalMode === "edit" && !!selectedDoctor}
+        onClose={() => setModalMode(null)}
+        id={selectedDoctor?.id}
+        onDoctorEdited={() => {
+          fetchDoctors();
+          setModalMode(null);
+        }}
+      />
+      <DeleteDoctorConfirm
+        open={modalMode === "delete" && !!selectedDoctor}
+        onClose={() => setModalMode(null)}
+        doctorName={selectedDoctor?.name}
+        onConfirm={async () => {
+          try {
+            await axios.delete(`/api/reception/doctors/${selectedDoctor.id}`);
+            setModalMode(null);
+            setSelectedDoctor(null);
+            fetchDoctors();
+          } catch (e) {
+            console.error("Error deleting doctor:", e);
+          }
+        }}
+        onDoctorDeleted={fetchDoctors}
+      />
     </>
   );
 };
