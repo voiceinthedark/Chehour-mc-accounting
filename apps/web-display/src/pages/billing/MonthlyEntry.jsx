@@ -48,6 +48,7 @@ export default function MonthlyEntry() {
   const [year] = useState(new Date().getFullYear());
   const [totalVisits, setTotalVisits] = useState(0);
   const [coveredVisits, setCoveredVisits] = useState(0);
+  const [coveredPatients, setCoveredPatients] = useState(0);
   const [regularPatients, setRegularPatients] = useState(0);
   const [charityPatients, setCharityPatients] = useState(0);
 
@@ -122,6 +123,7 @@ export default function MonthlyEntry() {
         year,
         totalVisits: Number(totalVisits),
         coveredVisits: Number(coveredVisits),
+        coveredPatients: Number(coveredPatients),
         regularPatients: Number(regularPatients),
         charityPatients: Number(charityPatients),
         servicesUsed,
@@ -284,6 +286,19 @@ export default function MonthlyEntry() {
                       inputProps={{ min: 0 }}
                       value={coveredVisits}
                       onChange={(e) => setCoveredVisits(e.target.value)}
+                    />
+                  </Grid>
+                )}
+                {perVisitFee > 0 && coveredVisits > 0 && (
+                  <Grid item xs={12} sm={3}>
+                    <TextField
+                      fullWidth
+                      label="مرضى أيام التغطية"
+                      helperText="عدد المرضى في أيام التغطية"
+                      type="number"
+                      inputProps={{ min: 0 }}
+                      value={coveredPatients}
+                      onChange={(e) => setCoveredPatients(e.target.value)}
                     />
                   </Grid>
                 )}
