@@ -68,14 +68,27 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!doctorName.trim()) {
+      toast.error("يرجى إدخال اسم الطبيب");
+      return;
+    }
+    if (!doctorPatientFee) {
+      toast.error("يرجى إدخال رسوم المريض");
+      return;
+    }
     try {
       await axios.post("/api/reception/doctors/new", {
-        name: doctorName,
+        name: doctorName.trim(),
         perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
-        doctorPatientCut: parseFloat(
-          doctorPatientCut.replace(/[^0-9.-]+/g, ""),
-        ),
-        perVisitFee: parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, "")),
+        // If left blank, fall back to the same value as perPatientFee
+        // (most doctors receive the full patient fee unless overridden).
+        doctorPatientCut: doctorPatientCut
+          ? parseFloat(doctorPatientCut.replace(/[^0-9.-]+/g, ""))
+          : undefined,
+        // If left blank, defaults to 0 (no guaranteed per-visit rate).
+        perVisitFee: doctorVisitFee
+          ? parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, ""))
+          : 0,
         serviceSplits,
       });
       // Add a success toast notification
@@ -84,7 +97,11 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
       onClose();
     } catch (error) {
       console.error("Error adding doctor:", error);
-      toast.error("فشل في إضافة الطبيب. حاول مرة أخرى.");
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.detail ||
+          "فشل في إضافة الطبيب. حاول مرة أخرى.",
+      );
     }
   };
 

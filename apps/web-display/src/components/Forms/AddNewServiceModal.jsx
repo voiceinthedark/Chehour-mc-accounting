@@ -10,6 +10,7 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
+import { toast } from "react-hot-toast";
 import "@fontsource/almarai"; // Import the Almarai font
 
 const AddNewServiceModal = ({ open, onClose, onServiceAdded }) => {
@@ -19,17 +20,37 @@ const AddNewServiceModal = ({ open, onClose, onServiceAdded }) => {
   const [loading, setLoading] = useState(false);
 
   const handleAddService = async () => {
+    if (!serviceName.trim()) {
+      toast.error("يرجى إدخال اسم الخدمة");
+      return;
+    }
+    if (!price) {
+      toast.error("يرجى إدخال سعر الخدمة");
+      return;
+    }
+
     setLoading(true);
     try {
       await axios.post("/api/reception/services/new", {
-        name: serviceName,
-        price,
-        doctorSplitPercent,
+        name: serviceName.trim(),
+        price: Number(price),
+        // Backend defaults to 0 if left blank
+        doctorSplitPercent: doctorSplitPercent
+          ? Number(doctorSplitPercent)
+          : undefined,
       });
-      console.log("Service added");
+      toast.success("تم إضافة الخدمة بنجاح");
+      setServiceName("");
+      setPrice("");
+      setDoctorSplitPercent("");
       onServiceAdded();
     } catch (error) {
       console.error("Error adding service:", error);
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.detail ||
+          "فشل في إضافة الخدمة",
+      );
     }
     setLoading(false);
   };

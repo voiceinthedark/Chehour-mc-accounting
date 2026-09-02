@@ -10,27 +10,44 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
+import { toast } from "react-hot-toast";
 import "@fontsource/almarai"; // Import the Almarai font
 
 const EditServiceModal = ({ open, onClose, service, onServiceEdited }) => {
   const [name, setName] = useState(service.name);
   const [price, setPrice] = useState(service.price);
+  const [doctorSplitPercent, setDoctorSplitPercent] = useState(
+    service.doctorSplitPercent ?? "",
+  );
   const [loading, setLoading] = useState(false);
 
   const handleEditService = async () => {
+    if (!name.trim()) {
+      toast.error("يرجى إدخال اسم الخدمة");
+      return;
+    }
+    if (!price) {
+      toast.error("يرجى إدخال سعر الخدمة");
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await axios.put(
-        `/api/reception/services/${service.id}`,
-        {
-          name,
-          price,
-        },
-      );
-      console.log("Service updated:", response.data);
+      await axios.put(`/api/reception/services/${service.id}`, {
+        name: name.trim(),
+        price: Number(price),
+        doctorSplitPercent:
+          doctorSplitPercent === "" ? undefined : Number(doctorSplitPercent),
+      });
+      toast.success("تم تعديل الخدمة بنجاح");
       onServiceEdited(); // Notify parent component about the edit
     } catch (error) {
       console.error("Error updating service:", error);
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.detail ||
+          "فشل تعديل الخدمة",
+      );
     }
     setLoading(false);
   };
@@ -72,6 +89,16 @@ const EditServiceModal = ({ open, onClose, service, onServiceEdited }) => {
               textAlign: "right", // Align the input text to the right
             },
           }}
+        />
+        <TextField
+          fullWidth
+          label="نسبة الطبيب (0-1)"
+          helperText="مثالً 0.5 لـ 50%. يمكن تخطي هذا إذا كان لدى الطبيب تخصيص خاص"
+          type="number"
+          inputProps={{ min: 0, max: 1, step: 0.01 }}
+          value={doctorSplitPercent}
+          onChange={(e) => setDoctorSplitPercent(e.target.value)}
+          sx={{ mb: 2 }}
         />
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Button

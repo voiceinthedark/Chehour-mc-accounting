@@ -94,25 +94,39 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!doctorName.trim()) {
+      toast.error("يرجى إدخال اسم الطبيب");
+      return;
+    }
+    if (!doctorPatientFee) {
+      toast.error("يرجى إدخال رسوم المريض");
+      return;
+    }
     try {
       await axios.put(`/api/reception/doctors/${doctorId}/settings`, {
-        name: doctorName,
+        name: doctorName.trim(),
         perPatientFee: parseFloat(
           String(doctorPatientFee).replace(/[^0-9.-]+/g, ""),
         ),
-        doctorPatientCut: parseFloat(
-          String(doctorPatientCut).replace(/[^0-9.-]+/g, ""),
-        ),
-        perVisitFee: parseFloat(
-          String(doctorVisitFee).replace(/[^0-9.-]+/g, ""),
-        ),
+        // If left blank, backend falls back to perPatientFee.
+        doctorPatientCut: doctorPatientCut
+          ? parseFloat(String(doctorPatientCut).replace(/[^0-9.-]+/g, ""))
+          : undefined,
+        // If left blank, backend defaults to 0.
+        perVisitFee: doctorVisitFee
+          ? parseFloat(String(doctorVisitFee).replace(/[^0-9.-]+/g, ""))
+          : 0,
         serviceSplits,
       });
       toast.success("تم تعديل بيانات الطبيب بنجاح");
       onDoctorEdited(); // Notify parent component to refresh the list
       onClose();
     } catch (error) {
-      toast.error("فشل تعديل بيانات الطبيب");
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.detail ||
+          "فشل تعديل بيانات الطبيب",
+      );
     }
   };
 
