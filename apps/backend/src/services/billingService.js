@@ -47,13 +47,34 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
   let consultationPay = new Decimal(0);
   let appliedRule = "";
+  let dataWarning = null;
 
   if (isPerVisitDoctor && coveredVisits > 0) {
-    // Mixed rule: some days were under per-visit (covered), the rest per-patient
+    // Mixed rule: some days were under per-visit (covered), the rest per-patient.
+    // "Regular" (non-covered) patients can only exist on visit days that
+    // weren't already covered by the guaranteed per-visit fee. If every
+    // visit this month was covered (coveredVisits >= totalVisits), there
+    // are no remaining non-covered days for regularPatients/charityPatients
+    // to have occurred on, so patientPay must be 0 to avoid double-paying
+    // the doctor for the same visits.
+    const remainingVisits = totalVisits - coveredVisits;
     const guaranteedPay = new Decimal(doctor.perVisitFee).mul(coveredVisits);
-    const patientPay = doctorPatientCut.mul(totalPatients);
+    const patientPay =
+      remainingVisits > 0
+        ? doctorPatientCut.mul(totalPatients)
+        : new Decimal(0);
     consultationPay = guaranteedPay.plus(patientPay);
     appliedRule = "MIXED";
+
+    if (remainingVisits <= 0 && totalPatients > 0) {
+      // Every visit was covered, yet regularPatients/charityPatients were
+      // still submitted — most likely a data-entry mistake where patients
+      // were logged under "regularPatients" instead of "coveredPatients".
+      dataWarning =
+        'جميع الزيارات كانت مغطاة (أيام تغطية = الزيارات الكلية)، لكن تم تسجيل مرضى منتظمين/مغطين إضافيين. تأكد من إدخال هؤلاء المرضى ضمن "مرضى أيام التغطية" بدلاً من ذلك.';
+      totalPatients = 0;
+    }
+
     // Net cost to center for covered days = what it paid doctor − what it collected from patients those days
     const coveredPatients = tally.coveredPatients ?? 0;
     const coveredDayNetCost = guaranteedPay.minus(
@@ -63,7 +84,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
       ? coveredDayNetCost
       : new Decimal(0);
     // Center also covers the doctor's cut for charity patients on normal days
-    if (tally.charityPatients > 0) {
+    if (remainingVisits > 0 && tally.charityPatients > 0) {
       totalCharityCost = totalCharityCost.plus(
         doctorPatientCut.mul(tally.charityPatients),
       );
@@ -144,6 +165,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
       charityCostToCenter: totalCharityCost.toFixed(2),
       centerConsultationNet: centerConsultationNet.toFixed(2),
     },
+    ...(dataWarning ? { dataWarning } : {}),
   };
 }
 
@@ -194,7 +216,20 @@ async function confirmDoctorPayout(doctorId, year, month) {
     where: { doctorId_month_year: { doctorId, month, year } },
   });
 
-  const [, transaction] = await prisma.$transaction([
+  const payoutDate = new Date(year, month - 1, 1);
+
+  // Revenue the center actually collected from paying patients this month
+  // (regular + covered patients). This is what was previously only computed
+  // in-memory as centerConsultationNet for the detail view, but never
+  // persisted to the ledger — meaning monthly summaries always showed 0
+  // income from consultations even though the center was clearly collecting
+  // patient fees.
+  const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
+  const payingPatients =
+    (tally.regularPatients ?? 0) + (tally.coveredPatients ?? 0);
+  const patientRevenue = new Decimal(doctor.perPatientFee).mul(payingPatients);
+
+  const operations = [
     prisma.monthlyTally.update({
       where: { id: tally.id },
       data: { isPaidOut: true },
@@ -207,10 +242,27 @@ async function confirmDoctorPayout(doctorId, year, month) {
         description: `Payout to ${payout.doctorName} for ${month}/${year}`,
         // Record the transaction as having occurred in the target month/year
         // being paid out, not the current real-world date.
-        date: new Date(year, month - 1, 1),
+        date: payoutDate,
       },
     }),
-  ]);
+  ];
+
+  if (patientRevenue.gt(0)) {
+    operations.push(
+      prisma.ledgerTransaction.create({
+        data: {
+          amount: patientRevenue.toFixed(2),
+          isOutflow: false,
+          category: "PATIENT_FEE",
+          description: `Patient fees collected for ${payout.doctorName} — ${month}/${year}`,
+          date: payoutDate,
+        },
+      }),
+    );
+  }
+
+  const results = await prisma.$transaction(operations);
+  const transaction = results[1];
 
   return { ...payout, transactionId: transaction.id };
 }

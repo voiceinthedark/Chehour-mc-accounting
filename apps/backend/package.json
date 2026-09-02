@@ -1,7 +1,7 @@
 {
   "name": "backend",
-  "version": "0.27.35",
-  "description": "",
+  "version": "0.27.39",
+  "description": "Chehour Medical Center Accounting System Backend",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -12,8 +12,13 @@
     "prisma:seed": "node prisma/seed.js",
     "prisma:reset": "node prisma/reset.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "backend",
+    "express",
+    "prisma",
+    "nodejs"
+  ],
+  "author": "Firas Abbas (abbas.firas@gmail.com)",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
