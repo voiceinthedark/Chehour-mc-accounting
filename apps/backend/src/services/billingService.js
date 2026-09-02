@@ -205,6 +205,9 @@ async function confirmDoctorPayout(doctorId, year, month) {
         isOutflow: true,
         category: "DOCTOR_PAYOUT",
         description: `Payout to ${payout.doctorName} for ${month}/${year}`,
+        // Record the transaction as having occurred in the target month/year
+        // being paid out, not the current real-world date.
+        date: new Date(year, month - 1, 1),
       },
     }),
   ]);
