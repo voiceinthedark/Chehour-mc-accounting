@@ -624,6 +624,58 @@ function DoctorPayoutsTab() {
                       : "▼"}
                   </Typography>
                 </Box>
+                {detailData.financials.serviceRevenue !== undefined && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 1,
+                      p: 1,
+                      borderRadius: 1,
+                      bgcolor:
+                        Number(detailData.financials.centerServiceNet) >= 0
+                          ? "#f0fdf4"
+                          : "#fff1f2",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: "Almarai, sans-serif",
+                        fontWeight: 700,
+                        color:
+                          Number(detailData.financials.centerServiceNet) >= 0
+                            ? "success.dark"
+                            : "error.dark",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      صافي المركز من الخدمات (إجمالي التحصيل{" "}
+                      {Number(
+                        detailData.financials.serviceRevenue,
+                      ).toLocaleString()}{" "}
+                      ل.ل)
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: "Almarai, sans-serif",
+                        fontWeight: 700,
+                        color:
+                          Number(detailData.financials.centerServiceNet) >= 0
+                            ? "success.dark"
+                            : "error.dark",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      {Number(
+                        detailData.financials.centerServiceNet,
+                      ).toLocaleString()}{" "}
+                      ل.ل{" "}
+                      {Number(detailData.financials.centerServiceNet) >= 0
+                        ? "▲"
+                        : "▼"}
+                    </Typography>
+                  </Box>
+                )}
                 <Box
                   sx={{
                     display: "flex",
