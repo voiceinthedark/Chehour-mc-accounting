@@ -392,6 +392,28 @@ function DoctorPayoutsTab() {
             </Typography>
           ) : (
             <Box>
+              {detailData.dataWarning && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    p: 1.5,
+                    borderRadius: 1,
+                    bgcolor: "#fff7ed",
+                    border: "1px solid #fdba74",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "warning.dark",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ⚠ {detailData.dataWarning}
+                  </Typography>
+                </Box>
+              )}
               {/* Stats row */}
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={4}>
