@@ -115,7 +115,8 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     }
   }
 
-  // 3. Process EKG, Echo, etc., for this month
+  // 3. Process EKG, Echo, Ultrasound, etc., for this month
+  let totalServiceRevenue = new Decimal(0);
   tally.serviceLogs.forEach((log) => {
     const totalServices = log.regularCount + log.charityCount;
     const override = splitOverrides.get(log.serviceId);
@@ -132,6 +133,13 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     }
 
     servicePayout = servicePayout.plus(doctorCut);
+
+    // The center only actually COLLECTS revenue from paying (regular)
+    // service instances — charity services are performed for free, so
+    // they don't contribute to revenue (their cost is tracked below).
+    totalServiceRevenue = totalServiceRevenue.plus(
+      new Decimal(log.service.price).mul(log.regularCount),
+    );
 
     // Track center's loss for charity services (always at full price, split doesn't apply)
     if (log.charityCount > 0) {
@@ -151,6 +159,10 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     .mul(tally.regularPatients + coveredPatientsCount)
     .minus(consultationPay);
 
+  // Net gain/loss for the center from services (ultrasound, EKG, etc.):
+  // what it collected from paying patients minus what it paid the doctor.
+  const centerServiceNet = totalServiceRevenue.minus(servicePayout);
+
   return {
     doctorName: doctor.name,
     stats: {
@@ -161,9 +173,11 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
     financials: {
       consultationPay: consultationPay.toFixed(2),
       servicePay: servicePayout.toFixed(2),
+      serviceRevenue: totalServiceRevenue.toFixed(2),
       totalOwed: totalOwed.toFixed(2),
       charityCostToCenter: totalCharityCost.toFixed(2),
       centerConsultationNet: centerConsultationNet.toFixed(2),
+      centerServiceNet: centerServiceNet.toFixed(2),
     },
     ...(dataWarning ? { dataWarning } : {}),
   };
@@ -255,6 +269,27 @@ async function confirmDoctorPayout(doctorId, year, month) {
           isOutflow: false,
           category: "PATIENT_FEE",
           description: `Patient fees collected for ${payout.doctorName} — ${month}/${year}`,
+          date: payoutDate,
+        },
+      }),
+    );
+  }
+
+  // Revenue the center collected from paying service instances (ultrasound,
+  // EKG, etc.) this month. Previously only the doctor's cut of this revenue
+  // was ever recorded (as part of DOCTOR_PAYOUT), so the center's actual
+  // service income was never persisted to the ledger — this made services
+  // that pay the doctor a flat/percent cut appear net-zero or negative even
+  // though the center collects the full service price from the patient.
+  const serviceRevenue = new Decimal(payout.financials.serviceRevenue ?? 0);
+  if (serviceRevenue.gt(0)) {
+    operations.push(
+      prisma.ledgerTransaction.create({
+        data: {
+          amount: serviceRevenue.toFixed(2),
+          isOutflow: false,
+          category: "SERVICE_FEE",
+          description: `Service fees collected for ${payout.doctorName} — ${month}/${year}`,
           date: payoutDate,
         },
       }),
