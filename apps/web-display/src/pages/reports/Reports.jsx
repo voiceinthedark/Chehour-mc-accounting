@@ -284,7 +284,16 @@ function DoctorPayoutsTab() {
             </TableHead>
             <TableBody>
               {payouts.map((row) => (
-                <TableRow key={row.doctorId} hover>
+                <TableRow
+                  key={row.doctorId}
+                  sx={{
+                    bgcolor: row.financials
+                      ? Number(row.financials.centerConsultationNet) >= 0
+                        ? "#f0fdf4"
+                        : "#fff1f2"
+                      : undefined,
+                  }}
+                >
                   <TableCell>
                     <Typography
                       sx={{
