@@ -1,16 +1,45 @@
-# React + Vite
+# Chehour Medical Center Web Display
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the web display application for Chehour Medical Center Financial Dashboard.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Display financial data in a user-friendly format
+- Real-time updates of financial metrics
+- Interactive charts and graphs for better data visualization
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Clone the repository:
 
-## Expanding the ESLint configuration
+```bash
+git clone repository_url
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Navigate to the project directory:
+
+```bash
+cd apps/web-display
+```
+
+- Install dependencies:
+
+```bash
+npm install
+```
+
+- Start the development server:
+
+```bash
+npm start
+```
+
+## Usage
+
+- Open your web browser and go to `http://localhost:3000` to view the web display.
+
+## ROADMAP
+
+- [ ] Standardize the data format for easier integration with other systems.
+- [ ] Implement Graphing and Visualization features for better data representation.
+- [ ] Add support for printable reports and export options.

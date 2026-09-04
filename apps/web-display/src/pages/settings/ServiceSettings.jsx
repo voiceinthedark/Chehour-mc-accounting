@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Typography, Button } from "@mui/material";
 import "@fontsource/almarai"; // Import the Almarai font
 import ServiceList from "../../components/Cards/ServiceList";
+import ServiceTable from "../../components/Tables/ServiceTable";
 import AddNewServiceModal from "../../components/Forms/AddNewServiceModal";
 import { Add } from "@mui/icons-material";
 import { API_RECEPTION_URL } from "../../apiconfig.js";
@@ -75,10 +76,10 @@ const ServiceSettings = () => {
             إضافة خدمة جديدة
           </Typography>
         </Button>
-        <ServiceList
+        <ServiceTable
           services={services}
-          onEdit={handleServiceEdited}
-          onDelete={handleServiceDeleted}
+          onServiceEdited={handleServiceEdited}
+          onServiceDeleted={handleServiceDeleted}
         />
       </div>
       <AddNewServiceModal
