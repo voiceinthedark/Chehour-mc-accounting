@@ -7,19 +7,27 @@ const prisma = new PrismaClient();
 /**
  * Calculates a doctor's payout for a specific month.
  */
-async function calculateMonthlyDoctorPayout(doctorId, year, month) {
-  // 1. Fetch the aggregated monthly tally (one record per doctor/month/year)
-  const tally = await prisma.monthlyTally.findUnique({
-    where: {
-      doctorId_month_year: { doctorId, month, year },
-    },
-    include: {
-      doctor: { include: { serviceSplits: true } },
-      serviceLogs: { include: { service: true } },
-    },
-  });
+async function calculateMonthlyDoctorPayout(
+  doctorId,
+  year,
+  month,
+  existingTally = null,
+) {
+  // 1. Fetch the aggregated monthly tally if one was not provided
+  let tally = existingTally;
+  if (!tally) {
+    tally = await prisma.monthlyTally.findUnique({
+      where: {
+        doctorId_month_year: { doctorId, month, year },
+      },
+      include: {
+        doctor: { include: { serviceSplits: true } },
+        serviceLogs: { include: { service: true } },
+      },
+    });
+  }
 
-  if (!tally || tally.isPaidOut)
+  if (!tally)
     return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
 
   const doctor = tally.doctor;
@@ -165,6 +173,7 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 
   return {
     doctorName: doctor.name,
+    isPaidOut: tally.isPaidOut,
     stats: {
       totalVisits,
       totalPatients,
@@ -184,6 +193,55 @@ async function calculateMonthlyDoctorPayout(doctorId, year, month) {
 }
 
 /**
+ * Returns the locked payout snapshot for a paid month, or a live
+ * recalculation if the month has not yet been paid out.
+ */
+async function getDoctorPayoutDetails(
+  doctorId,
+  year,
+  month,
+  existingTally = null,
+) {
+  let tally = existingTally;
+  if (!tally) {
+    tally = await prisma.monthlyTally.findUnique({
+      where: { doctorId_month_year: { doctorId, month, year } },
+      include: {
+        doctor: { include: { serviceSplits: true } },
+        serviceLogs: { include: { service: true } },
+      },
+    });
+  }
+
+  if (!tally)
+    return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
+
+  // If this month is already paid out, return the saved snapshot so the
+  // user always sees the numbers that were actually paid.
+  if (tally.isPaidOut) {
+    const snapshot = await prisma.doctorPayoutSnapshot.findUnique({
+      where: { doctorId_month_year: { doctorId, month, year } },
+      include: { doctor: true },
+    });
+
+    if (snapshot) {
+      return {
+        doctorName: snapshot.doctor.name,
+        isPaidOut: true,
+        paidAt: snapshot.createdAt,
+        stats: snapshot.stats,
+        financials: snapshot.financials,
+        ...(snapshot.dataWarning
+          ? { dataWarning: snapshot.dataWarning }
+          : {}),
+      };
+    }
+  }
+
+  return calculateMonthlyDoctorPayout(doctorId, year, month, tally);
+}
+
+/**
  * Lists every doctor's payout status for a given month — useful for a
  * reception dashboard "payouts due this month" overview.
  */
@@ -195,15 +253,12 @@ async function listMonthlyPayouts(year, month) {
 
   const results = [];
   for (const tally of tallies) {
-    const payout = await calculateMonthlyDoctorPayout(
-      tally.doctorId,
-      year,
-      month,
-    );
+    // Load the full detail (snapshot for paid months, live calc otherwise)
+    const payout = await getDoctorPayoutDetails(tally.doctorId, year, month);
     results.push({
       tallyId: tally.id,
       doctorId: tally.doctorId,
-      doctorName: tally.doctor.name,
+      doctorName: payout.doctorName ?? tally.doctor.name,
       isPaidOut: tally.isPaidOut,
       ...payout,
     });
@@ -215,30 +270,66 @@ async function listMonthlyPayouts(year, month) {
 /**
  * Confirms and finalizes a doctor's payout for a specific month:
  * - Recalculates the amount owed
+ * - Locks a snapshot of the payout calculation
  * - Marks the MonthlyTally as paid out
- * - Records a DOCTOR_PAYOUT ledger transaction
+ * - Records DOCTOR_PAYOUT / patient-fee / service-fee ledger transactions
  * All done atomically so partial writes never happen.
  */
 async function confirmDoctorPayout(doctorId, year, month) {
-  const payout = await calculateMonthlyDoctorPayout(doctorId, year, month);
+  // Load the tally with all related data up front
+  const tally = await prisma.monthlyTally.findUnique({
+    where: { doctorId_month_year: { doctorId, month, year } },
+    include: {
+      doctor: { include: { serviceSplits: true } },
+      serviceLogs: { include: { service: true } },
+    },
+  });
+
+  if (!tally) {
+    return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
+  }
+
+  // Idempotency: if already paid, return the locked snapshot. If this is
+  // a legacy paid month with no snapshot, just return the live recalculation
+  // without creating duplicate ledger entries.
+  if (tally.isPaidOut) {
+    const snapshot = await prisma.doctorPayoutSnapshot.findUnique({
+      where: { doctorId_month_year: { doctorId, month, year } },
+      include: { doctor: true },
+    });
+    if (snapshot) {
+      return {
+        doctorName: snapshot.doctor.name,
+        isPaidOut: true,
+        paidAt: snapshot.createdAt,
+        stats: snapshot.stats,
+        financials: snapshot.financials,
+        transactionId: null,
+        ...(snapshot.dataWarning
+          ? { dataWarning: snapshot.dataWarning }
+          : {}),
+      };
+    }
+
+    return {
+      ...(await calculateMonthlyDoctorPayout(doctorId, year, month, tally)),
+      isPaidOut: true,
+    };
+  }
+
+  const payout = await calculateMonthlyDoctorPayout(
+    doctorId,
+    year,
+    month,
+    tally,
+  );
 
   if (!payout.financials || new Decimal(payout.financials.totalOwed).lte(0)) {
     return payout; // Nothing to pay out
   }
 
-  const tally = await prisma.monthlyTally.findUnique({
-    where: { doctorId_month_year: { doctorId, month, year } },
-  });
-
   const payoutDate = new Date(year, month - 1, 1);
-
-  // Revenue the center actually collected from paying patients this month
-  // (regular + covered patients). This is what was previously only computed
-  // in-memory as centerConsultationNet for the detail view, but never
-  // persisted to the ledger — meaning monthly summaries always showed 0
-  // income from consultations even though the center was clearly collecting
-  // patient fees.
-  const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
+  const doctor = tally.doctor;
   const payingPatients =
     (tally.regularPatients ?? 0) + (tally.coveredPatients ?? 0);
   const patientRevenue = new Decimal(doctor.perPatientFee).mul(payingPatients);
@@ -259,6 +350,16 @@ async function confirmDoctorPayout(doctorId, year, month) {
         date: payoutDate,
       },
     }),
+    prisma.doctorPayoutSnapshot.create({
+      data: {
+        doctorId,
+        month,
+        year,
+        stats: payout.stats,
+        financials: payout.financials,
+        dataWarning: payout.dataWarning ?? null,
+      },
+    }),
   ];
 
   if (patientRevenue.gt(0)) {
@@ -276,11 +377,7 @@ async function confirmDoctorPayout(doctorId, year, month) {
   }
 
   // Revenue the center collected from paying service instances (ultrasound,
-  // EKG, etc.) this month. Previously only the doctor's cut of this revenue
-  // was ever recorded (as part of DOCTOR_PAYOUT), so the center's actual
-  // service income was never persisted to the ledger — this made services
-  // that pay the doctor a flat/percent cut appear net-zero or negative even
-  // though the center collects the full service price from the patient.
+  // EKG, etc.) this month.
   const serviceRevenue = new Decimal(payout.financials.serviceRevenue ?? 0);
   if (serviceRevenue.gt(0)) {
     operations.push(
@@ -299,11 +396,12 @@ async function confirmDoctorPayout(doctorId, year, month) {
   const results = await prisma.$transaction(operations);
   const transaction = results[1];
 
-  return { ...payout, transactionId: transaction.id };
+  return { ...payout, isPaidOut: true, transactionId: transaction.id };
 }
 
 module.exports = {
   calculateMonthlyDoctorPayout,
   confirmDoctorPayout,
   listMonthlyPayouts,
+  getDoctorPayoutDetails,
 };

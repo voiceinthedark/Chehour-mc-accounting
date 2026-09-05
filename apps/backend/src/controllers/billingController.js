@@ -1,7 +1,7 @@
 // filepath: apps/backend/src/controllers/billingController.js
 
 const {
-  calculateMonthlyDoctorPayout,
+  getDoctorPayoutDetails,
   confirmDoctorPayout,
   listMonthlyPayouts,
 } = require("../services/billingService");
@@ -11,14 +11,14 @@ async function previewPayout(req, res) {
   const { doctorId, year, month } = req.params;
 
   try {
-    const result = await calculateMonthlyDoctorPayout(
+    const result = await getDoctorPayoutDetails(
       doctorId,
       Number(year),
       Number(month),
     );
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Failed to calculate payout" });
+    res.status(500).json({ error: "Failed to fetch payout details" });
   }
 }
 

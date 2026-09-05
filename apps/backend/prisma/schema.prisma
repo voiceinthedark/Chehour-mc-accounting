@@ -18,8 +18,9 @@ model Doctor {
   doctorPatientCut Decimal @default(600000) @db.Decimal(20, 2) // What the DOCTOR receives per patient
   perVisitFee      Decimal @db.Decimal(20, 2) // Guaranteed daily rate (used when avg patients < 5/day)
 
-  tallies       MonthlyTally[]
-  serviceSplits DoctorServiceSplit[]
+  tallies         MonthlyTally[]
+  serviceSplits   DoctorServiceSplit[]
+  payoutSnapshots DoctorPayoutSnapshot[]
 }
 
 model Service {
@@ -89,6 +90,24 @@ model MonthlyServiceLog {
 
   tally   MonthlyTally @relation(fields: [tallyId], references: [id], onDelete: Cascade)
   service Service      @relation(fields: [serviceId], references: [id])
+}
+
+// Snapshot of the full payout calculation at the moment it is confirmed.
+// This lets users reopen paid months in the future and see exactly what
+// was owed and how it was calculated, even if underlying data changes.
+model DoctorPayoutSnapshot {
+  id           String   @id @default(uuid())
+  doctorId     String
+  month        Int
+  year         Int
+  stats        Json
+  financials   Json
+  dataWarning  String?
+  createdAt    DateTime @default(now())
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, month, year])
 }
 
 // ==========================================
