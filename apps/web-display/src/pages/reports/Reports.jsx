@@ -378,8 +378,20 @@ function DoctorPayoutsTab() {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ fontFamily: "Almarai, sans-serif" }}>
-          تفاصيل مستحقات الطبيب — {MONTH_NAMES[month - 1]} {year}
+        <DialogTitle
+          sx={{
+            fontFamily: "Almarai, sans-serif",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span>
+            تفاصيل مستحقات الطبيب — {MONTH_NAMES[month - 1]} {year}
+          </span>
+          {detailData?.isPaidOut && (
+            <Chip label="مدفوع" color="success" size="small" />
+          )}
         </DialogTitle>
         <DialogContent dividers>
           {detailLoading || !detailData ? (

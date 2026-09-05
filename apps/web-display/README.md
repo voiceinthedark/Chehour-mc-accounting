@@ -40,6 +40,6 @@ npm start
 
 ## ROADMAP
 
-- [ ] Standardize the data format for easier integration with other systems.
+- [x] Standardize the data format for easier integration with other systems.
 - [ ] Implement Graphing and Visualization features for better data representation.
 - [ ] Add support for printable reports and export options.
