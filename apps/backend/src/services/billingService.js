@@ -123,6 +123,13 @@ async function calculateMonthlyDoctorPayout(
     }
   }
 
+  // NOTE: Added Revisions
+  // Revisions: doctor is paid revisionFee each; the Center collects nothing
+  const revisionPatients = tally.revisionPatients ?? 0;
+  const revisionPay = new Decimal(doctor.revisionFee ?? 0).mul(
+    revisionPatients,
+  );
+
   // 3. Process EKG, Echo, Ultrasound, etc., for this month
   let totalServiceRevenue = new Decimal(0);
   tally.serviceLogs.forEach((log) => {
@@ -158,14 +165,15 @@ async function calculateMonthlyDoctorPayout(
   });
 
   // 4. Final Calculation
-  const totalOwed = consultationPay.plus(servicePayout);
+  const totalOwed = consultationPay.plus(revisionPay).plus(servicePayout);
 
   // Net gain/loss for the center from consultations only
   // (paying patients = regularPatients + coveredPatients; charity patients don't pay)
   const coveredPatientsCount = tally.coveredPatients ?? 0;
   const centerConsultationNet = centerPatientFee
     .mul(tally.regularPatients + coveredPatientsCount)
-    .minus(consultationPay);
+    .minus(consultationPay)
+    .minus(revisionPay);
 
   // Net gain/loss for the center from services (ultrasound, EKG, etc.):
   // what it collected from paying patients minus what it paid the doctor.
@@ -177,10 +185,12 @@ async function calculateMonthlyDoctorPayout(
     stats: {
       totalVisits,
       totalPatients,
+      revisionPatients, // NOTE: add revisionPatients to stats
       appliedRule,
     },
     financials: {
       consultationPay: consultationPay.toFixed(2),
+      revisionPay: revisionPay.toFixed(2),
       servicePay: servicePayout.toFixed(2),
       serviceRevenue: totalServiceRevenue.toFixed(2),
       totalOwed: totalOwed.toFixed(2),
@@ -231,9 +241,7 @@ async function getDoctorPayoutDetails(
         paidAt: snapshot.createdAt,
         stats: snapshot.stats,
         financials: snapshot.financials,
-        ...(snapshot.dataWarning
-          ? { dataWarning: snapshot.dataWarning }
-          : {}),
+        ...(snapshot.dataWarning ? { dataWarning: snapshot.dataWarning } : {}),
       };
     }
   }
@@ -305,9 +313,7 @@ async function confirmDoctorPayout(doctorId, year, month) {
         stats: snapshot.stats,
         financials: snapshot.financials,
         transactionId: null,
-        ...(snapshot.dataWarning
-          ? { dataWarning: snapshot.dataWarning }
-          : {}),
+        ...(snapshot.dataWarning ? { dataWarning: snapshot.dataWarning } : {}),
       };
     }
 

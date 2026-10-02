@@ -20,8 +20,14 @@ function toDecimalOrDefault(value, fallback) {
  */
 async function updateDoctorSettings(req, res) {
   const { id } = req.params;
-  const { name, perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } =
-    req.body;
+  const {
+    name,
+    perPatientFee,
+    doctorPatientCut,
+    perVisitFee,
+    revisionFee,
+    serviceSplits,
+  } = req.body;
 
   const normalizedPerPatientFee = toDecimalOrDefault(perPatientFee, undefined);
   if (normalizedPerPatientFee === undefined) {
@@ -43,6 +49,10 @@ async function updateDoctorSettings(req, res) {
           ),
           // Defaults to 0 (no guaranteed per-visit rate) if left blank.
           perVisitFee: toDecimalOrDefault(perVisitFee, 0),
+          revisionFee: toDecimalOrDefault(
+            revisionFee,
+            toDecimalOrDefault(doctorPatientCut, normalizedPerPatientFee) / 2,
+          ),
         },
       });
 
@@ -108,6 +118,7 @@ async function submitMonthlyTally(req, res) {
     coveredPatients,
     regularPatients,
     charityPatients,
+    revisionPatients,
     servicesUsed,
   } = req.body;
 
@@ -132,6 +143,7 @@ async function submitMonthlyTally(req, res) {
             coveredPatients: coveredPatients ?? 0,
             regularPatients,
             charityPatients,
+            revisionPatients: revisionPatients ?? 0,
             serviceLogs: {
               create: (servicesUsed || []).map((srv) => ({
                 serviceId: srv.serviceId,
@@ -153,6 +165,7 @@ async function submitMonthlyTally(req, res) {
           coveredPatients: coveredPatients ?? 0,
           regularPatients,
           charityPatients,
+          revisionPatients: revisionPatients ?? 0,
           serviceLogs: {
             create: (servicesUsed || []).map((srv) => ({
               serviceId: srv.serviceId,
@@ -171,8 +184,14 @@ async function submitMonthlyTally(req, res) {
 }
 
 async function addNewDoctor(req, res) {
-  const { name, perPatientFee, doctorPatientCut, perVisitFee, serviceSplits } =
-    req.body;
+  const {
+    name,
+    perPatientFee,
+    doctorPatientCut,
+    perVisitFee,
+    revisionFee,
+    serviceSplits,
+  } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({ error: "Doctor name is required" });
@@ -197,6 +216,10 @@ async function addNewDoctor(req, res) {
           ),
           // Defaults to 0 (no guaranteed per-visit rate) if left blank.
           perVisitFee: toDecimalOrDefault(perVisitFee, 0),
+          revisionFee: toDecimalOrDefault(
+            revisionFee,
+            toDecimalOrDefault(doctorPatientCut, normalizedPerPatientFee) / 2,
+          ),
         },
       });
 

@@ -17,6 +17,7 @@ model Doctor {
   perPatientFee    Decimal @db.Decimal(20, 2) // What the CENTER collects per patient
   doctorPatientCut Decimal @default(600000) @db.Decimal(20, 2) // What the DOCTOR receives per patient
   perVisitFee      Decimal @db.Decimal(20, 2) // Guaranteed daily rate (used when avg patients < 5/day)
+  revisionFee      Decimal @default(0) @db.Decimal(20, 2) // What the CENTER collects for a revision visit
 
   tallies         MonthlyTally[]
   serviceSplits   DoctorServiceSplit[]
@@ -65,11 +66,12 @@ model MonthlyTally {
   year     Int // e.g., 2026
 
   // Aggregated Volumes
-  totalVisits     Int @default(0) // Days the doctor actually showed up
-  coveredVisits   Int @default(0) // Days where patients < 5 and per-visit fee was applied
-  coveredPatients Int @default(0) // Patients seen on those covered days
-  regularPatients Int @default(0) // Patients who paid (from non-covered days)
-  charityPatients Int @default(0) // Patients covered by the center
+  totalVisits      Int @default(0) // Days the doctor actually showed up
+  coveredVisits    Int @default(0) // Days where patients < 5 and per-visit fee was applied
+  coveredPatients  Int @default(0) // Patients seen on those covered days
+  regularPatients  Int @default(0) // Patients who paid (from non-covered days)
+  charityPatients  Int @default(0) // Patients covered by the center
+  revisionPatients Int @default(0) // Patients who came in for a revision visit. Center receives nothing
 
   isPaidOut Boolean @default(false)
 
@@ -96,14 +98,14 @@ model MonthlyServiceLog {
 // This lets users reopen paid months in the future and see exactly what
 // was owed and how it was calculated, even if underlying data changes.
 model DoctorPayoutSnapshot {
-  id           String   @id @default(uuid())
-  doctorId     String
-  month        Int
-  year         Int
-  stats        Json
-  financials   Json
-  dataWarning  String?
-  createdAt    DateTime @default(now())
+  id          String   @id @default(uuid())
+  doctorId    String
+  month       Int
+  year        Int
+  stats       Json
+  financials  Json
+  dataWarning String?
+  createdAt   DateTime @default(now())
 
   doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
 
