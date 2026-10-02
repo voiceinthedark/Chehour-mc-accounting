@@ -522,6 +522,31 @@ function DoctorPayoutsTab() {
                     ل.ل
                   </Typography>
                 </Box>
+                {detailData.financials.revisionPay !== undefined && (
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: "Almarai, sans-serif",
+                        color: "text.secondary",
+                      }}
+                    >
+                      أجر المراجعات ({detailData.stats.revisionPatients ?? 0})
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: "Almarai, sans-serif",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {Number(
+                        detailData.financials.revisionPay,
+                      ).toLocaleString()}{" "}
+                      ل.ل
+                    </Typography>
+                  </Box>
+                )}
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography
                     sx={{

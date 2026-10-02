@@ -43,6 +43,10 @@ export default function MonthlyEntry() {
   const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [perVisitFee, setPerVisitFee] = useState("");
 
+  // revisions
+  const [revisionFee, setRevisionFee] = useState("");
+  const [revisionPatients, setRevisionPatients] = useState(0);
+
   // Monthly Data Entry State
   const [month, setMonth] = useState(new Date().getMonth() + 1); // 1-12
   const [year] = useState(new Date().getFullYear());
@@ -78,6 +82,7 @@ export default function MonthlyEntry() {
       setPerPatientFee(doc.perPatientFee);
       setDoctorPatientCut(doc.doctorPatientCut);
       setPerVisitFee(doc.perVisitFee);
+      setRevisionFee(doc.revisionFee || "");
     }
   };
 
@@ -95,7 +100,7 @@ export default function MonthlyEntry() {
     try {
       await axios.put(
         `${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`,
-        { perPatientFee, doctorPatientCut, perVisitFee },
+        { perPatientFee, doctorPatientCut, perVisitFee, revisionFee },
       );
       toast.success("تم حفظ الاعدادات");
     } catch (err) {
@@ -126,6 +131,7 @@ export default function MonthlyEntry() {
         coveredPatients: Number(coveredPatients),
         regularPatients: Number(regularPatients),
         charityPatients: Number(charityPatients),
+        revisionPatients: Number(revisionPatients),
         servicesUsed,
       });
       toast.success("تم حفظ البيانات الشهرية");
@@ -214,6 +220,16 @@ export default function MonthlyEntry() {
                     type="number"
                     value={perVisitFee}
                     onChange={(e) => setPerVisitFee(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="حصة الطبيب من المراجعة (ل.ل)"
+                    helperText="المركز لا يتقاضى شيئاً؛ الافتراضي نصف حصة المريض"
+                    type="number"
+                    value={revisionFee}
+                    onChange={(e) => setRevisionFee(e.target.value)}
                   />
                 </Grid>
               </Grid>
@@ -318,6 +334,16 @@ export default function MonthlyEntry() {
                     type="number"
                     value={charityPatients}
                     onChange={(e) => setCharityPatients(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="عدد المراجعات"
+                    type="number"
+                    inputProps={{ min: 0 }}
+                    value={revisionPatients}
+                    onChange={(e) => setRevisionPatients(e.target.value)}
                   />
                 </Grid>
               </Grid>
