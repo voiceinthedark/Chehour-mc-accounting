@@ -8,31 +8,10 @@ This is the web display application for Chehour Medical Center Financial Dashboa
 - Real-time updates of financial metrics
 - Interactive charts and graphs for better data visualization
 
-## Installation
+## Technologies Used
 
-- Clone the repository:
-
-```bash
-git clone repository_url
-```
-
-- Navigate to the project directory:
-
-```bash
-cd apps/web-display
-```
-
-- Install dependencies:
-
-```bash
-npm install
-```
-
-- Start the development server:
-
-```bash
-npm start
-```
+- React.js for building the user interface
+- React Router for navigation between different views
 
 ## Usage
 

@@ -19,36 +19,16 @@ valuable insights into the financial health of Chehour's medical center.
 - **Customizable Settings**: Tailor the system to meet the specific needs of the
   medical center, including billing codes, payment methods, and reporting formats.
 
-## Installation
+## Technologies Used
 
-- Clone the repository to your local machine:
-
-  ```bash
-  git clone https://github.com/voiceinthedark/Chehour-mc-accounting.git
-  ```
-
-- Navigate to the project directory:
-
-  ```bash
-  cd Chehour-mc-accounting
-  ```
-
-- Install the required dependencies:
-
-  ```bash
-  npm install
-  ```
-
-- Start the application:
-
-  ```bash
-  npm start
-  ```
+- **Backend**: Node.js, Express.js, Postgres for database management.
+- **Frontend**: React.js for building the user interface, React Router for
+  navigation between different views.
 
 ## Usage
 
-- Access the backend through your web browser at `http://localhost:3017`.
-- Access the frontend through your web browser at `http://localhost:4177`.
+- Access the backend through your web browser at `http://localhost:4000`.
+- Access the frontend through your web browser at `http://localhost:3000`.
 - Use the provided interface to input financial data, generate reports, and manage
   accounts for each doctor.
 
@@ -59,8 +39,8 @@ valuable insights into the financial health of Chehour's medical center.
 - [x] Create forms for data entry and editing of financial records.
 - [x] Implement report generation functionality for weekly and monthly reports.
 - [x] Add data validation and error handling to ensure data integrity.
-- [ ] Conduct user testing and gather feedback for improvements.
-- [ ] Deploy the application to a production environment and ensure scalability.
+- [x] Conduct user testing and gather feedback for improvements.
+- [x] Deploy the application to a production environment and ensure scalability.
 
 ## Roadmap
 

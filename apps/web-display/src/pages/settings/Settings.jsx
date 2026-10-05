@@ -3,6 +3,7 @@ import { Typography, Tabs, Tab, Box } from "@mui/material";
 import "@fontsource/almarai";
 import DoctorSettings from "./DoctorSettings";
 import ServiceSettings from "./ServiceSettings";
+import CurrencySettings from "./CurrencySettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -36,6 +37,13 @@ const Settings = () => {
             </Typography>
           }
         />
+        <Tab
+          label={
+            <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+              إعدادات العملة
+            </Typography>
+          }
+        />
       </Tabs>
 
       <Box hidden={activeTab !== 0}>
@@ -43,6 +51,9 @@ const Settings = () => {
       </Box>
       <Box hidden={activeTab !== 1}>
         {activeTab === 1 && <DoctorSettings />}
+      </Box>
+      <Box hidden={activeTab !== 2}>
+        {activeTab === 2 && <CurrencySettings />}
       </Box>
     </div>
   );

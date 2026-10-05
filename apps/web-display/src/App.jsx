@@ -6,6 +6,7 @@ import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import LabOrders from "./pages/lab/LabOrders.jsx";
 import Ledger from "./pages/ledger/Ledger.jsx";
+import { CurrencyProvider } from "./contexts/CurrencyContext.jsx";
 import "./App.css";
 
 import { Toaster } from "react-hot-toast";
@@ -55,7 +56,9 @@ const router = createBrowserRouter([
     path: "/settings",
     element: (
       <MainLayout>
-        <Settings />
+        <CurrencyProvider>
+          <Settings />
+        </CurrencyProvider>
       </MainLayout>
     ),
   },
