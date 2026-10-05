@@ -52,7 +52,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "settings",
+    path: "/settings",
     element: (
       <MainLayout>
         <Settings />

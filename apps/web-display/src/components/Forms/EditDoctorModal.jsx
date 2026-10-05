@@ -18,12 +18,14 @@ import { Delete } from "@mui/icons-material";
 import NumberField from "../Inputs/NumberField";
 import axios from "axios";
 import "@fontsource/almarai";
+import { API_RECEPTION_URL } from "../../apiconfig";
 
 const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
+  const [revisionFee, setRevisionFee] = useState("");
   const [doctorId, setDoctorId] = useState("");
   const [services, setServices] = useState([]);
   const [splitType, setSplitType] = useState("FLAT");
@@ -36,8 +38,8 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
     // Fetch services from the server when the component mounts
     const fetchServices = async () => {
       try {
-        const response = await axios.get("/api/reception/services");
-        setServices(response.data);
+        const response = await axios.get(`${API_RECEPTION_URL}/services`);
+        setServices(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         toast.error("Failed to fetch services");
       }
@@ -50,12 +52,15 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
     if (open && id) {
       const fetchDoctorData = async () => {
         try {
-          const response = await axios.get(`/api/reception/doctors/${id}`);
+          const response = await axios.get(
+            `${API_RECEPTION_URL}/doctors/${id}`,
+          );
           const doctorData = response.data;
           setDoctorName(doctorData.name);
           setDoctorPatientFee(doctorData.perPatientFee);
           setDoctorPatientCut(doctorData.doctorPatientCut);
           setDoctorVisitFee(doctorData.perVisitFee);
+          setRevisionFee(doctorData.revisionFee);
           setDoctorId(doctorData.id);
           setServiceSplits(doctorData.serviceSplits ?? []);
         } catch (error) {
@@ -103,7 +108,7 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
       return;
     }
     try {
-      await axios.put(`/api/reception/doctors/${doctorId}/settings`, {
+      await axios.put(`${API_RECEPTION_URL}/doctors/${doctorId}/settings`, {
         name: doctorName.trim(),
         perPatientFee: parseFloat(
           String(doctorPatientFee).replace(/[^0-9.-]+/g, ""),
@@ -115,6 +120,9 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
         // If left blank, backend defaults to 0.
         perVisitFee: doctorVisitFee
           ? parseFloat(String(doctorVisitFee).replace(/[^0-9.-]+/g, ""))
+          : 0,
+        revisionFee: revisionFee
+          ? parseFloat(String(revisionFee).replace(/[^0-9.-]+/g, ""))
           : 0,
         serviceSplits,
       });
@@ -192,6 +200,14 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
             sx={{ mb: 2 }}
             placeholder="1,000,000 ل.ل"
           />
+          <NumberField
+            label="رسوم المراجعة"
+            fullWidth
+            value={revisionFee}
+            onChange={(value) => setRevisionFee(value)}
+            sx={{ mb: 2 }}
+            placeholder="300,000 ل.ل"
+          />
 
           <hr />
           <Typography
@@ -245,7 +261,7 @@ const EditDoctorModal = ({ open, onClose, id, onDoctorEdited }) => {
                 label="الخدمة"
                 onChange={(e) => setSelectedService(e.target.value)}
               >
-                {services
+                {(Array.isArray(services) ? services : [])
                   .filter(
                     (s) => !serviceSplits.some((sp) => sp.serviceId === s.id),
                   )

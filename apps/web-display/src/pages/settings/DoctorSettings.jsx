@@ -27,6 +27,7 @@ import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import axios from "axios";
 import AddNewDoctorModal from "../../components/Forms/AddNewDoctorModal";
 import "./doctorSettings.scss";
+import { API_RECEPTION_URL } from "../../apiconfig.js";
 
 const cacheRtl = createCache({
   key: "muirtl",
@@ -52,12 +53,12 @@ const DoctorSettings = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await fetch("/api/reception/doctors");
+      const response = await fetch(`${API_RECEPTION_URL}/doctors`);
       if (!response.ok) {
         throw new Error("Failed to fetch doctors");
       }
       const data = await response.json();
-      setDoctors(data);
+      setDoctors(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching doctors:", error);
     }

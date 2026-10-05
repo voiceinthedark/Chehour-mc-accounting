@@ -17,12 +17,14 @@ import { toast } from "react-hot-toast";
 import "@fontsource/almarai";
 import axios from "axios";
 import "./addNewDoctorModal.scss";
+import { API_RECEPTION_URL } from "../../apiconfig";
 
 const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
   const [doctorName, setDoctorName] = useState("");
   const [doctorPatientFee, setDoctorPatientFee] = useState("");
   const [doctorPatientCut, setDoctorPatientCut] = useState("");
   const [doctorVisitFee, setDoctorVisitFee] = useState("");
+  const [revisionFee, setRevisionFee] = useState("");
   const [services, setServices] = useState([]);
 
   // Per-service split state
@@ -34,8 +36,8 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
   useEffect(() => {
     if (open) {
       axios
-        .get("/api/reception/services")
-        .then((res) => setServices(res.data))
+        .get(`${API_RECEPTION_URL}/services`)
+        .then((res) => setServices(Array.isArray(res.data) ? res.data : []))
         .catch(() => toast.error("فشل تحميل الخدمات"));
     }
   }, [open]);
@@ -77,7 +79,7 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
       return;
     }
     try {
-      await axios.post("/api/reception/doctors/new", {
+      await axios.post(`${API_RECEPTION_URL}/doctors/new`, {
         name: doctorName.trim(),
         perPatientFee: parseFloat(doctorPatientFee.replace(/[^0-9.-]+/g, "")),
         // If left blank, fall back to the same value as perPatientFee
@@ -88,6 +90,9 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
         // If left blank, defaults to 0 (no guaranteed per-visit rate).
         perVisitFee: doctorVisitFee
           ? parseFloat(doctorVisitFee.replace(/[^0-9.-]+/g, ""))
+          : 0,
+        revisionFee: revisionFee
+          ? parseFloat(revisionFee.replace(/[^0-9.-]+/g, ""))
           : 0,
         serviceSplits,
       });
@@ -163,6 +168,14 @@ const AddNewDoctorModal = ({ open, onClose, onDoctorAdded }) => {
             onChange={(value) => setDoctorVisitFee(value)}
             sx={{ mb: 2 }}
             placeholder="1,000,000 ل.ل"
+          />
+          <NumberField
+            label="رسوم المراجعة"
+            fullWidth
+            value={revisionFee}
+            onChange={(value) => setRevisionFee(value)}
+            sx={{ mb: 2 }}
+            placeholder="300,000 ل.ل"
           />
 
           <hr />

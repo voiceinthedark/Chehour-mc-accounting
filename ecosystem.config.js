@@ -22,7 +22,6 @@ module.exports = {
       error_file: "./logs/med-account-api-error.log",
       out_file: "./logs/med-account-api-out.log",
     },
-    // Optional: If running a dedicated SSR/Next frontend or serving static build via serve
     {
       name: "med-account-web",
       script: "serve",
