@@ -1,7 +1,6 @@
 // filepath: apps/web-display/src/components/Pills/DollarPill.jsx
 
 const DollarPill = ({ amountInDollars, position }) => {
-  // TODO: Implement the pill component with the given amount and position
   const getPositionStyles = (position) => {
     let pos = {};
     switch (position) {

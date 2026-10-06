@@ -16,13 +16,23 @@ const MoneyWidget = ({ title, amount, color }) => {
             : color === "red"
               ? "rgb(255,0,0,0.3)"
               : "white",
+        borderRadius: "15px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        border: "1px solid rgba(0, 0, 0, 0.1)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
       <CardContent>
         <Typography
           variant="h5"
           component="div"
-          style={{ fontFamily: "Almarai, sans-serif", marginBottom: "22px" }}
+          style={{
+            fontFamily: "Almarai, sans-serif",
+            marginBottom: "22px",
+            opacity: 1,
+          }}
         >
           {title}
         </Typography>
