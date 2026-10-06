@@ -1,19 +1,11 @@
 // filepath: apps/web-display/src/pages/reports/Reports.jsx
 
 import { useState } from "react";
-import {
-  Typography,
-  Tabs,
-  Tab,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { Typography, Tabs, Tab } from "@mui/material";
 import "@fontsource/almarai";
 import DoctorPayoutsTab from "./DoctorPayoutsTab";
 import MonthlySummaryTab from "./MonthlySummaryTab";
+import YearlySummaryTab from "./YearlySummaryTab";
 
 // ============================================================
 // ROOT COMPONENT
@@ -50,10 +42,18 @@ const Reports = () => {
             </Typography>
           }
         />
+        <Tab
+          label={
+            <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+              الملخص المالي السنوي
+            </Typography>
+          }
+        />
       </Tabs>
 
       {activeTab === 0 && <DoctorPayoutsTab />}
       {activeTab === 1 && <MonthlySummaryTab />}
+      {activeTab === 2 && <YearlySummaryTab />}
     </div>
   );
 };

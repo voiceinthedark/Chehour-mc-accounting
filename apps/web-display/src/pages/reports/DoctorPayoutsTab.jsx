@@ -25,11 +25,7 @@ import {
 import "@fontsource/almarai";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import {
-  API_BILLING_URL,
-  API_REPORTS_URL,
-  API_RECEPTION_URL,
-} from "../../apiconfig";
+import { API_BILLING_URL, API_RECEPTION_URL } from "../../apiconfig";
 
 const MONTH_NAMES = [
   "كانون الثاني",
