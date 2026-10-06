@@ -1,6 +1,9 @@
 // filepath: apps/backend/src/controllers/reportController.js
 
-const { getMonthlySummary } = require("../services/reportService");
+const {
+  getMonthlySummary,
+  getTotalRevenueAndExpenses,
+} = require("../services/reportService");
 
 async function monthlySummary(req, res) {
   const { year, month } = req.params;
@@ -13,6 +16,19 @@ async function monthlySummary(req, res) {
   }
 }
 
+async function totalRevenueAndExpenses(req, res) {
+  const { year } = req.params;
+  try {
+    const totals = await getTotalRevenueAndExpenses(year);
+    res.json(totals);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to compute total revenue and expenses" });
+  }
+}
+
 module.exports = {
   monthlySummary,
+  totalRevenueAndExpenses,
 };

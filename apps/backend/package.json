@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "0.30.05",
+  "version": "0.31.02",
   "description": "Chehour Medical Center Accounting System Backend",
   "main": "src/index.js",
   "scripts": {
