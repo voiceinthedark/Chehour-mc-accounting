@@ -87,6 +87,7 @@ async function getTotalRevenueAndExpenses(year) {
   return {
     totalRevenue: totalRevenue.toFixed(2),
     totalExpenses: totalExpenses.toFixed(2),
+    netProfit: totalRevenue.minus(totalExpenses).toFixed(2),
   };
 }
 

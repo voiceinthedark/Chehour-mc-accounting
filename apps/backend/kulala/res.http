@@ -37,3 +37,6 @@ GET http://localhost:4000/api/reception/doctors
 
 #### GET DOCTOR BY ID
 GET http://localhost:4000/api/reception/doctors/{{id}}
+
+### Fetch Yearly revenue summary
+GET http://localhost:4000/api/reports/total-revenue-expenses/2026
