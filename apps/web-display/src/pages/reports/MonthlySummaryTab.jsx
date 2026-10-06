@@ -267,6 +267,21 @@ function MonthlySummaryTab() {
                               ? Number(vals.inflow).toLocaleString()
                               : "—"}
                           </Typography>
+                          {Number(vals.inflow) > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontFamily: "Almarai, sans-serif",
+                                color: "text.secondary",
+                              }}
+                            >
+                              (
+                              {formatLebaneseToDollar(
+                                vals.inflow / localCurrencyRate,
+                              )}
+                              )
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell align="right">
                           <Typography
@@ -281,6 +296,21 @@ function MonthlySummaryTab() {
                               ? Number(vals.outflow).toLocaleString()
                               : "—"}
                           </Typography>
+                          {Number(vals.outflow) > 0 && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontFamily: "Almarai, sans-serif",
+                                color: "text.secondary",
+                              }}
+                            >
+                              (
+                              {formatLebaneseToDollar(
+                                vals.outflow / localCurrencyRate,
+                              )}
+                              )
+                            </Typography>
+                          )}
                         </TableCell>
                       </TableRow>
                     ),

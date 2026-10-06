@@ -27,6 +27,7 @@ const DollarPill = ({ amountInDollars, position }) => {
     <div
       style={{
         display: "inline-block",
+        zIndex: 1000,
         padding: "0.2rem 0.5rem",
         borderRadius: "9999px",
         backgroundColor: "#4CAF50",
