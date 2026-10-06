@@ -37,6 +37,11 @@ import {
   API_REPORTS_URL,
   API_RECEPTION_URL,
 } from "../../apiconfig";
+import {
+  getCurrencyFromLocalStorage,
+  formatLebaneseToDollar,
+} from "../../utils/utilities";
+import DollarPill from "../../components/Pills/DollarPill";
 
 const MONTH_NAMES = [
   "كانون الثاني",
@@ -804,6 +809,7 @@ function MonthlySummaryTab() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
 
   const fetchSummary = useCallback(async () => {
     setLoading(true);
@@ -822,6 +828,12 @@ function MonthlySummaryTab() {
   useEffect(() => {
     fetchSummary();
   }, [fetchSummary]);
+
+  useEffect(() => {
+    const currency = getCurrencyFromLocalStorage();
+    if (currency) setLocalCurrencyRate(currency);
+    else setLocalCurrencyRate(89500);
+  }, []);
 
   const netIsPositive = summary && Number(summary.netProfit) >= 0;
 
@@ -842,7 +854,7 @@ function MonthlySummaryTab() {
         <>
           {/* Top KPI cards */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
               <Card variant="outlined" sx={{ bgcolor: "#f0fdf4" }}>
                 <CardContent>
                   <Typography
@@ -861,6 +873,12 @@ function MonthlySummaryTab() {
                   >
                     {Number(summary.totalInflow).toLocaleString()}
                   </Typography>
+                  <DollarPill
+                    position={"top-right"}
+                    amountInDollars={formatLebaneseToDollar(
+                      summary.totalInflow / localCurrencyRate,
+                    )}
+                  />
                   <Typography
                     variant="caption"
                     sx={{
@@ -873,7 +891,7 @@ function MonthlySummaryTab() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
               <Card variant="outlined" sx={{ bgcolor: "#fff1f2" }}>
                 <CardContent>
                   <Typography
@@ -892,6 +910,12 @@ function MonthlySummaryTab() {
                   >
                     {Number(summary.totalOutflow).toLocaleString()}
                   </Typography>
+                  <DollarPill
+                    position={"top-right"}
+                    amountInDollars={formatLebaneseToDollar(
+                      summary.totalOutflow / localCurrencyRate,
+                    )}
+                  />
                   <Typography
                     variant="caption"
                     sx={{
@@ -904,7 +928,7 @@ function MonthlySummaryTab() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
               <Card
                 variant="outlined"
                 sx={{ bgcolor: netIsPositive ? "#eff6ff" : "#fff7ed" }}
@@ -928,6 +952,12 @@ function MonthlySummaryTab() {
                   >
                     {Number(summary.netProfit).toLocaleString()}
                   </Typography>
+                  <DollarPill
+                    amountInDollars={formatLebaneseToDollar(
+                      summary.netProfit / localCurrencyRate,
+                    )}
+                    position={"top-right"}
+                  />
                   <Typography
                     variant="caption"
                     sx={{

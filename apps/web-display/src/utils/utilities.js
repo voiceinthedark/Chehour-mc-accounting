@@ -10,6 +10,15 @@ export const formatCurrencyToLebanese = (currency) => {
   }).format(currency);
 };
 
+export const formatLebaneseToDollar = (currency) => {
+  return new Intl.NumberFormat("en-LB", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(currency);
+};
+
 export const saveCurrencyToJsonFile = (currency) => {
   // Save the currency to a JSON file
   const currencyString = JSON.stringify(currency);
