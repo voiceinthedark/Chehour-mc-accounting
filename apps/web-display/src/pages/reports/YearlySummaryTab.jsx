@@ -211,7 +211,7 @@ const YearlySummaryTab = () => {
                 variant="h6"
                 sx={{ fontFamily: "Almarai, sans-serif" }}
               >
-                صافي الربح
+                رصيد حالي
               </Typography>
               <Typography
                 variant="h5"

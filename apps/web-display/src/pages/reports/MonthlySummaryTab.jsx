@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Card,
@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
+import PieChartWidget from "../../components/Widgets/PieChartWidget";
 import MonthYearSelector from "../../components/MonthYearSelector";
 import DollarPill from "../../components/Pills/DollarPill";
 import { API_REPORTS_URL } from "../../apiconfig";
@@ -41,6 +42,7 @@ function MonthlySummaryTab() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [summary, setSummary] = useState(null);
+  const [summaryWithDetails, setSummaryWithDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
 
@@ -58,9 +60,24 @@ function MonthlySummaryTab() {
     }
   }, [month, year]);
 
+  const fetchSummaryWithDetails = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${API_REPORTS_URL}/monthly-summary/${year}/${month}/details`,
+      );
+      setSummaryWithDetails(res.data);
+    } catch {
+      toast.error("فشل تحميل الملخص المالي مع التفاصيل");
+    } finally {
+      setLoading(false);
+    }
+  }, [month, year]);
+
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary]);
+    fetchSummaryWithDetails();
+  }, [fetchSummary, fetchSummaryWithDetails]);
 
   useEffect(() => {
     const currency = getCurrencyFromLocalStorage();
@@ -69,6 +86,18 @@ function MonthlySummaryTab() {
   }, []);
 
   const netIsPositive = summary && Number(summary.netProfit) >= 0;
+
+  const pieChartData = summaryWithDetails
+    ? [
+        Object.entries(summaryWithDetails.categoryBreakdown).map(
+          ([cat, vals]) => ({
+            id: CATEGORY_LABELS[cat] ?? cat,
+            label: CATEGORY_LABELS[cat] ?? cat,
+            value: Number(vals.inflow) + Number(vals.outflow),
+          }),
+        ),
+      ]
+    : [];
 
   return (
     <Box>
@@ -319,6 +348,17 @@ function MonthlySummaryTab() {
               </Table>
             </TableContainer>
           )}
+
+          {summaryWithDetails &&
+            Object.keys(summary.categoryBreakdown).length > 0 && (
+              <Box sx={{ mt: 4 }}>
+                <PieChartWidget
+                  data={pieChartData[0]}
+                  title="توزيع الإيرادات والمصاريف حسب الفئة"
+                  donut={true}
+                />
+              </Box>
+            )}
 
           {Object.keys(summary.categoryBreakdown).length === 0 && (
             <Typography
