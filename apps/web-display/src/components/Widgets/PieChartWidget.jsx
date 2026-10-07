@@ -38,14 +38,13 @@ const PieChartWidget = ({ data, title, donut }) => {
       </Typography>
       {donut ? (
         <PieChart
-          series={[{ data }]}
-          width={400}
-          height={400}
+          series={[{ data, innerRadius: 50, outerRadius: 100 }]}
+          width={300}
+          height={300}
           title={title}
-          innerRadius={0.5}
         />
       ) : (
-        <PieChart series={[{ data }]} width={400} height={400} title={title} />
+        <PieChart series={[{ data }]} width={300} height={300} title={title} />
       )}
     </Box>
   );

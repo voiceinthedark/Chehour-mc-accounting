@@ -23,6 +23,7 @@ import { API_REPORTS_URL } from "../../apiconfig";
 import {
   formatLebaneseToDollar,
   getCurrencyFromLocalStorage,
+  formatCurrencyToLebanese,
 } from "../../utils/utilities";
 
 const CATEGORY_LABELS = {
@@ -355,7 +356,7 @@ function MonthlySummaryTab() {
                 <PieChartWidget
                   data={pieChartData[0]}
                   title="توزيع الإيرادات والمصاريف حسب الفئة"
-                  donut={true}
+                  donut
                 />
               </Box>
             )}
