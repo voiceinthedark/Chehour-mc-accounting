@@ -91,7 +91,109 @@ async function getTotalRevenueAndExpenses(year) {
   };
 }
 
+/**
+ * Fetches the monthly summary along with detailed transactions for that month.
+ * @param {number} year - The year for which to fetch the summary.
+ * @param {number} month - The month (1-12) for which to fetch the summary.
+ * @returns {Promise<Object>} - An object containing the monthly summary and detailed transactions.
+ * */
+async function getMonthlySummaryWithDetails(year, month) {
+  const summary = await getMonthlySummary(year, month);
+
+  // Fetch detailed transactions for the month
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+
+  const transactions = await prisma.ledgerTransaction.findMany({
+    where: { date: { gte: startDate, lte: endDate } },
+    orderBy: { date: "asc" },
+  });
+
+  return {
+    ...summary,
+    transactions,
+  };
+}
+
+/**
+ * Fetches total revenue and expenses for the provided year along with detailed transactions for that year.
+ * @param {number} year - The year for which to fetch the totals and details.
+ * @returns {Promise<Object>} - An object containing total revenue, total expenses, net profit, and detailed transactions.
+ * */
+async function getTotalRevenueAndExpensesWithDetails(year) {
+  const totals = await getTotalRevenueAndExpenses(year);
+
+  // Fetch detailed transactions for the year
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+  const transactions = await prisma.ledgerTransaction.findMany({
+    where: { date: { gte: startDate, lte: endDate } },
+    orderBy: { date: "asc" },
+  });
+
+  return {
+    ...totals,
+    transactions,
+  };
+}
+
+/**
+ * Fetches total revenue and expenses for the provided year along with a breakdown by category.
+ * @param {number} year - The year for which to fetch the totals and category breakdown.
+ * @returns {Promise<Object>} - An object containing total revenue, total expenses, net profit, and a breakdown by category.
+ * */
+async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
+  const startDate = new Date(year, 0, 1);
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+  const transactions = await prisma.ledgerTransaction.findMany({
+    where: { date: { gte: startDate, lte: endDate } },
+  });
+
+  let totalRevenue = new Decimal(0);
+  let totalExpenses = new Decimal(0);
+  const byCategory = {};
+
+  transactions.forEach((tx) => {
+    const amount = new Decimal(tx.amount);
+
+    if (!byCategory[tx.category]) {
+      byCategory[tx.category] = {
+        inflow: new Decimal(0),
+        outflow: new Decimal(0),
+      };
+    }
+
+    if (tx.isOutflow) {
+      totalExpenses = totalExpenses.plus(amount);
+      byCategory[tx.category].outflow =
+        byCategory[tx.category].outflow.plus(amount);
+    } else {
+      totalRevenue = totalRevenue.plus(amount);
+      byCategory[tx.category].inflow =
+        byCategory[tx.category].inflow.plus(amount);
+    }
+  });
+  const categoryBreakdown = Object.fromEntries(
+    Object.entries(byCategory).map(([category, { inflow, outflow }]) => [
+      category,
+      { inflow: inflow.toFixed(2), outflow: outflow.toFixed(2) },
+    ]),
+  );
+
+  return {
+    totalRevenue: totalRevenue.toFixed(2),
+    totalExpenses: totalExpenses.toFixed(2),
+    netProfit: totalRevenue.minus(totalExpenses).toFixed(2),
+    categoryBreakdown,
+  };
+}
+
 module.exports = {
   getMonthlySummary,
   getTotalRevenueAndExpenses,
+  getMonthlySummaryWithDetails,
+  getTotalRevenueAndExpensesWithDetails,
+  getTotalRevenueAndExpensesWithCategoryBreakdown,
 };
