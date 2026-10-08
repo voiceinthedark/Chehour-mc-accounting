@@ -6,7 +6,9 @@ const {
   getMonthlySummaryWithDetails,
   getTotalRevenueAndExpensesWithDetails,
   getTotalRevenueAndExpensesWithCategoryBreakdown,
+  getMonthlySummaryWithDoctorDetails,
 } = require("../services/reportService");
+const logger = require("../utils/logger");
 
 /**
  * Controller for generating monthly summary report.
@@ -96,10 +98,37 @@ async function totalRevenueAndExpensesWithCategoryBreakdown(req, res) {
   }
 }
 
+/**
+ * Controller for generating monthly summary report with doctor details.
+ * Returns aggregated revenue/expense summary along with doctor details for a given month.
+ * */
+async function monthlySummaryWithDoctorDetails(req, res) {
+  const { year, month } = req.params;
+
+  try {
+    const summaryWithDoctorDetails = await getMonthlySummaryWithDoctorDetails(
+      Number(year),
+      Number(month),
+    );
+    logger.info(
+      `Monthly summary with doctor details for ${year}-${month}: ${JSON.stringify(summaryWithDoctorDetails)}`,
+    );
+    res.json(summaryWithDoctorDetails);
+  } catch (error) {
+    logger.error(
+      `Error computing monthly summary with doctor details for ${year}-${month}: ${error.message}`,
+    );
+    res
+      .status(500)
+      .json({ error: "Failed to compute monthly summary with doctor details" });
+  }
+}
+
 module.exports = {
   monthlySummary,
   totalRevenueAndExpenses,
   monthlySummaryWithDetails,
   totalRevenueAndExpensesWithDetails,
   totalRevenueAndExpensesWithCategoryBreakdown,
+  monthlySummaryWithDoctorDetails,
 };

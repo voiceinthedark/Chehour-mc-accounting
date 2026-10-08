@@ -8,6 +8,7 @@ const {
   monthlySummaryWithDetails,
   totalRevenueAndExpensesWithCategoryBreakdown,
   totalRevenueAndExpensesWithDetails,
+  monthlySummaryWithDoctorDetails,
 } = require("../controllers/reportController");
 
 // Aggregated revenue/expense summary for a given month
@@ -29,6 +30,12 @@ router.get(
 router.get(
   "/total-revenue-expenses/:year/details",
   totalRevenueAndExpensesWithDetails,
+);
+
+// Monthly summary with doctor details for a given month
+router.get(
+  "/monthly-summary/:year/:month/doctor-details",
+  monthlySummaryWithDoctorDetails,
 );
 
 module.exports = router;

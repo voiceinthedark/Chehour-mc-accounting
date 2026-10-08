@@ -3,6 +3,7 @@
 const { PrismaClient } = require("@prisma/client");
 const Decimal = require("decimal.js");
 const prisma = new PrismaClient();
+const logger = require("../utils/logger");
 
 /**
  * Computes the aggregated revenue/expense summary for a given month,
@@ -190,10 +191,27 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
   };
 }
 
+async function getMonthlySummaryWithDoctorDetails(year, month) {
+  // const summary = await getMonthlySummary(year, month);
+
+  const transactions = await prisma.doctorPayoutSnapshot.findMany({
+    where: { month: month, year: year },
+    orderBy: { doctorId: "asc" },
+    include: {
+      doctor: true,
+    },
+  });
+
+  return {
+    transactions,
+  };
+}
+
 module.exports = {
   getMonthlySummary,
   getTotalRevenueAndExpenses,
   getMonthlySummaryWithDetails,
   getTotalRevenueAndExpensesWithDetails,
   getTotalRevenueAndExpensesWithCategoryBreakdown,
+  getMonthlySummaryWithDoctorDetails,
 };
