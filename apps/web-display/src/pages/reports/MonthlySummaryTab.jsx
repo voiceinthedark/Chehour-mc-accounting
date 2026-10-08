@@ -23,7 +23,6 @@ import { API_REPORTS_URL } from "../../apiconfig";
 import {
   formatLebaneseToDollar,
   getCurrencyFromLocalStorage,
-  formatCurrencyToLebanese,
 } from "../../utils/utilities";
 
 const CATEGORY_LABELS = {
@@ -44,6 +43,7 @@ function MonthlySummaryTab() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [summary, setSummary] = useState(null);
   const [summaryWithDetails, setSummaryWithDetails] = useState(null);
+  const [doctorSummary, setDoctorSummary] = useState(null);
   const [loading, setLoading] = useState(false);
   const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
 
@@ -75,10 +75,26 @@ function MonthlySummaryTab() {
     }
   }, [month, year]);
 
+  const fetchDoctorSummary = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${API_REPORTS_URL}/monthly-summary/${year}/${month}/doctor-details`,
+      );
+      setDoctorSummary(res.data);
+      console.log("Doctor Summary:", res.data);
+    } catch {
+      toast.error("فشل تحميل ملخص الأطباء");
+    } finally {
+      setLoading(false);
+    }
+  }, [month, year]);
+
   useEffect(() => {
     fetchSummary();
     fetchSummaryWithDetails();
-  }, [fetchSummary, fetchSummaryWithDetails]);
+    fetchDoctorSummary();
+  }, [fetchSummary, fetchSummaryWithDetails, fetchDoctorSummary]);
 
   useEffect(() => {
     const currency = getCurrencyFromLocalStorage();
@@ -97,6 +113,16 @@ function MonthlySummaryTab() {
             value: Number(vals.inflow) + Number(vals.outflow),
           }),
         ),
+      ]
+    : [];
+
+  const pieChartDataForDoctors = doctorSummary
+    ? [
+        Object.entries(doctorSummary.transactions).map(([id, vals]) => ({
+          id: vals.id,
+          label: vals.doctor.name,
+          value: Number(vals.financials.totalOwed),
+        })),
       ]
     : [];
 
@@ -352,10 +378,24 @@ function MonthlySummaryTab() {
 
           {summaryWithDetails &&
             Object.keys(summary.categoryBreakdown).length > 0 && (
-              <Box sx={{ mt: 4 }}>
+              <Box
+                sx={{
+                  mt: 4,
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 4,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <PieChartWidget
                   data={pieChartData[0]}
                   title="توزيع الإيرادات والمصاريف حسب الفئة"
+                  donut
+                />
+                <PieChartWidget
+                  data={pieChartDataForDoctors[0]}
+                  title="توزيع المدفوعات حسب الطبيب"
                   donut
                 />
               </Box>
