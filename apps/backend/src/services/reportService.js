@@ -207,6 +207,28 @@ async function getMonthlySummaryWithDoctorDetails(year, month) {
   };
 }
 
+/**
+ * Fetches the monthly summaries for all months in a given year.
+ * @param {number} year - The year for which to fetch the monthly summaries.
+ * @returns {Promise<Array>} - An array of monthly summaries for each month in the year.
+ * */
+async function getYearlySummary(year) {
+  const monthlySummaries = [];
+
+  for (let month = 1; month <= 12; month++) {
+    const summary = await getMonthlySummary(year, month);
+    monthlySummaries.push(summary);
+  }
+
+  // Get the total revenue and expenses for the year
+  const totals = await getTotalRevenueAndExpenses(year);
+
+  return {
+    totals,
+    monthly: monthlySummaries,
+  };
+}
+
 module.exports = {
   getMonthlySummary,
   getTotalRevenueAndExpenses,
@@ -214,4 +236,5 @@ module.exports = {
   getTotalRevenueAndExpensesWithDetails,
   getTotalRevenueAndExpensesWithCategoryBreakdown,
   getMonthlySummaryWithDoctorDetails,
+  getYearlySummary,
 };

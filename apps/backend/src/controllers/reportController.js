@@ -7,6 +7,7 @@ const {
   getTotalRevenueAndExpensesWithDetails,
   getTotalRevenueAndExpensesWithCategoryBreakdown,
   getMonthlySummaryWithDoctorDetails,
+  getYearlySummary,
 } = require("../services/reportService");
 const logger = require("../utils/logger");
 
@@ -124,6 +125,21 @@ async function monthlySummaryWithDoctorDetails(req, res) {
   }
 }
 
+/**
+ * Controller for generating yearly summary report.
+ * Returns aggregated revenue/expense summary for a given year.
+ * */
+async function yearlySummary(req, res) {
+  const { year } = req.params;
+
+  try {
+    const summary = await getYearlySummary(Number(year));
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to compute yearly summary" });
+  }
+}
+
 module.exports = {
   monthlySummary,
   totalRevenueAndExpenses,
@@ -131,4 +147,5 @@ module.exports = {
   totalRevenueAndExpensesWithDetails,
   totalRevenueAndExpensesWithCategoryBreakdown,
   monthlySummaryWithDoctorDetails,
+  yearlySummary,
 };

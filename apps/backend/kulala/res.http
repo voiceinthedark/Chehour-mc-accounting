@@ -58,3 +58,6 @@ GET http://localhost:4000/api/reports/total-revenue-expenses/2026/category-break
 
 ### Fetch Monthly tally withh doctor details
 GET http://localhost:4000/api/reports/monthly-summary/2026/8/doctor-details
+
+### Fetch Yearly tally with monthly breakdown
+Get http://localhost:4000/api/reports/yearly-summary/2026/
