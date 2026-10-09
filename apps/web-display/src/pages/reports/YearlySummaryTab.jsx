@@ -118,7 +118,10 @@ const YearlySummaryTab = () => {
               </Typography>
               <Typography
                 variant="h5"
-                sx={{ fontFamily: "montserrat, sans-serif" }}
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(51, 133, 10)",
+                }}
               >
                 {formatCurrencyToLebanese(summaryData.totalRevenue)}
               </Typography>
@@ -160,19 +163,25 @@ const YearlySummaryTab = () => {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 opacity:
                   summaryData.totalExpenses > summaryData.totalRevenue
-                    ? 0.5
+                    ? 0.8
                     : 1,
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontFamily: "Almarai, sans-serif" }}
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(255, 0, 0)",
+                }}
               >
                 إجمالي المصاريف
               </Typography>
               <Typography
                 variant="h5"
-                sx={{ fontFamily: "montserrat, sans-serif" }}
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(255, 0, 0)",
+                }}
               >
                 {formatCurrencyToLebanese(summaryData.totalExpenses)}
               </Typography>
@@ -215,7 +224,10 @@ const YearlySummaryTab = () => {
               </Typography>
               <Typography
                 variant="h5"
-                sx={{ fontFamily: "montserrat, sans-serif" }}
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(0, 0, 255)",
+                }}
               >
                 {formatCurrencyToLebanese(summaryData.netProfit)}
               </Typography>

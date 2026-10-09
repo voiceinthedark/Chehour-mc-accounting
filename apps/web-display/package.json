@@ -1,7 +1,7 @@
 {
   "name": "web-display",
   "private": true,
-  "version": "0.33.01",
+  "version": "0.33.04",
   "type": "module",
   "scripts": {
     "dev": "vite",
