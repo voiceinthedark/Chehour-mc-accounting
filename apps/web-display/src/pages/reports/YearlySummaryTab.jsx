@@ -22,6 +22,7 @@ import {
   formatLebaneseToDollar,
   getCurrencyFromLocalStorage,
 } from "../../utils/utilities";
+import monthArabic from "../../utils/constants/monthArabic";
 
 const YearlySummaryTab = () => {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -39,7 +40,7 @@ const YearlySummaryTab = () => {
 
       setYearlyData(
         monthlyData.map((item) => ({
-          month: item.period.month,
+          month: monthArabic[item.period.month] || item.period.month,
           totalInflow: parseFloat(item.totalInflow),
           totalOutflow: parseFloat(item.totalOutflow),
           netProfit: parseFloat(item.netProfit),
@@ -278,25 +279,56 @@ const YearlySummaryTab = () => {
                   {
                     scaleType: "band",
                     data: yearlyData.map((item) => item.month),
+                    tickLabelStyle: {
+                      fontFamily: "Almarai, sans-serif",
+                      fontSize: 12,
+                    },
                   },
                 ]}
                 series={[
                   {
                     data: yearlyData.map((item) => item.totalInflow),
                     label: "الإيرادات",
+                    color: "rgb(51, 133, 10)",
+                    area: true,
                   },
                   {
                     data: yearlyData.map((item) => item.totalOutflow),
                     label: "المصاريف",
+                    color: "rgb(255, 0, 0)",
+                    area: true,
                   },
                   {
                     data: yearlyData.map((item) => item.netProfit),
                     label: "الرصيد الحالي",
+                    color: "rgb(0, 0, 255)",
+                    area: true,
                   },
                 ]}
-                yAxis={[{ scaleType: "linear" }]}
-                width={800}
-                height={400}
+                yAxis={[
+                  {
+                    scaleType: "linear",
+                    label: "المبلغ (ل.ل)",
+                    tickFormat: (value) => formatCurrencyToLebanese(value),
+                    tickLabelStyle: {
+                      fontFamily: "Almarai, sans-serif",
+                    },
+                  },
+                ]}
+                onLineClick={(seriesIndex, pointIndex) => {
+                  const clickedData = yearlyData[pointIndex];
+                  toast(
+                    `شهر: ${clickedData.month}, الإيرادات: ${formatCurrencyToLebanese(
+                      clickedData.totalInflow,
+                    )}, المصاريف: ${formatCurrencyToLebanese(
+                      clickedData.totalOutflow,
+                    )}, الرصيد الحالي: ${formatCurrencyToLebanese(
+                      clickedData.netProfit,
+                    )}`,
+                  );
+                }}
+                width={980}
+                height={500}
                 sx={{ mt: 3 }}
               />
             ) : (
