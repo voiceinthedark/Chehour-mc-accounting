@@ -1,6 +1,7 @@
 // filepath: apps/web-display/src/pages/reports/YearlySummaryTab.jsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { LineChart } from "@mui/x-charts/LineChart";
 import {
   Typography,
   Grid,
@@ -26,6 +27,29 @@ const YearlySummaryTab = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [summaryData, setSummaryData] = useState(null);
   const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
+  const [yearlyData, setYearlyData] = useState([]); // State to hold the yearly data for the line chart
+
+  const fetchYearlyData = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${API_REPORTS_URL}/yearly-summary/${year}`,
+      );
+
+      const monthlyData = response.data.monthly;
+
+      setYearlyData(
+        monthlyData.map((item) => ({
+          month: item.period.month,
+          totalInflow: parseFloat(item.totalInflow),
+          totalOutflow: parseFloat(item.totalOutflow),
+          netProfit: parseFloat(item.netProfit),
+        })),
+      );
+    } catch (error) {
+      console.error("Error fetching yearly data for line chart:", error);
+      toast.error("حدث خطأ أثناء جلب بيانات الملخص السنوي للرسم البياني.");
+    }
+  }, [year]);
 
   useEffect(() => {
     const currency = getCurrencyFromLocalStorage();
@@ -48,6 +72,7 @@ const YearlySummaryTab = () => {
     };
 
     fetchSummaryData();
+    fetchYearlyData(); // Fetch the yearly data for the line chart
   }, [year]);
 
   return (
@@ -105,14 +130,17 @@ const YearlySummaryTab = () => {
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 textAlign: "center",
-                backgroundColor: "rgb(0, 133, 0, 0.3)",
+                backgroundColor: "rgb(0, 173, 0, 0.3)",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 position: "relative",
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontFamily: "Almarai, sans-serif" }}
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(51, 133, 10)",
+                }}
               >
                 إجمالي الإيرادات
               </Typography>
@@ -211,14 +239,17 @@ const YearlySummaryTab = () => {
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 textAlign: "center",
-                backgroundColor: "#e3f2fd",
+                backgroundColor: "rgb(0, 0, 155, 0.1)",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 opacity: summaryData.netProfit < 0 ? 0.5 : 1,
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontFamily: "Almarai, sans-serif" }}
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(0, 0, 155)",
+                }}
               >
                 رصيد حالي
               </Typography>
@@ -233,6 +264,53 @@ const YearlySummaryTab = () => {
               </Typography>
             </Box>
           </Grid>
+          <Box sx={{ mt: 4 }}>
+            <Typography
+              variant="h5"
+              gutterBottom
+              sx={{ fontFamily: "Almarai, sans-serif", mb: 2 }}
+            >
+              ملخص الإيرادات والمصاريف على مدار السنة
+            </Typography>
+            {yearlyData.length > 0 ? (
+              <LineChart
+                xAxis={[
+                  {
+                    scaleType: "band",
+                    data: yearlyData.map((item) => item.month),
+                  },
+                ]}
+                series={[
+                  {
+                    data: yearlyData.map((item) => item.totalInflow),
+                    label: "الإيرادات",
+                  },
+                  {
+                    data: yearlyData.map((item) => item.totalOutflow),
+                    label: "المصاريف",
+                  },
+                  {
+                    data: yearlyData.map((item) => item.netProfit),
+                    label: "الرصيد الحالي",
+                  },
+                ]}
+                yAxis={[{ scaleType: "linear" }]}
+                width={800}
+                height={400}
+                sx={{ mt: 3 }}
+              />
+            ) : (
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  mt: 2,
+                }}
+              >
+                جاري تحميل بيانات الرسم البياني...
+              </Typography>
+            )}
+          </Box>
         </Grid>
       ) : (
         <Typography
