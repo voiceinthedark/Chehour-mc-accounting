@@ -1,0 +1,16 @@
+{
+  "name": "@chehour/types",
+  "version": "1.0.0",
+  "description": "A shared types package for common TypeScript types and interfaces.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "shared",
+    "types",
+    "interfaces"
+  ],
+  "author": "Firas Abbas(abbas.firas@gmail.com)",
+  "license": "MIT"
+}

@@ -22,7 +22,7 @@ import {
   formatLebaneseToDollar,
   getCurrencyFromLocalStorage,
 } from "../../utils/utilities";
-import monthArabic from "../../utils/constants/monthArabic";
+import { monthArabic } from "@chehour/utils";
 
 const YearlySummaryTab = () => {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -300,7 +300,7 @@ const YearlySummaryTab = () => {
                   },
                   {
                     data: yearlyData.map((item) => item.netProfit),
-                    label: "الرصيد الحالي",
+                    label: "الرصيد الشهري",
                     color: "rgb(0, 0, 255)",
                     area: true,
                   },
@@ -322,7 +322,7 @@ const YearlySummaryTab = () => {
                       clickedData.totalInflow,
                     )}, المصاريف: ${formatCurrencyToLebanese(
                       clickedData.totalOutflow,
-                    )}, الرصيد الحالي: ${formatCurrencyToLebanese(
+                    )}, الرصيد الشهري: ${formatCurrencyToLebanese(
                       clickedData.netProfit,
                     )}`,
                   );

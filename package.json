@@ -1,5 +1,5 @@
 {
-  "name": "Chehour-mc-accounting-root",
+  "name": "@chehour/accounting",
   "version": "1.0.0",
   "description": "Monorepo root for Chehour-mc-accounting",
   "workspaces": [

@@ -1,0 +1,16 @@
+{
+  "name": "@chehour/utils",
+  "version": "1.0.0",
+  "description": "A shared utility package for common functions and helpers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "shared",
+    "utilities",
+    "helpers"
+  ],
+  "author": "Firas Abbas(abbas.firas@gmail.com)",
+  "license": "MIT"
+}

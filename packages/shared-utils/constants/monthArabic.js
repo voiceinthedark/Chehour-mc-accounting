@@ -1,4 +1,4 @@
-// filepath: apps/web-display/src/utils/constants/monthArabic.js
+// filepath: packages/shared-utils/constants/monthArabic.js
 
 const monthArabic = {
   1: "كلنون الثاني",
