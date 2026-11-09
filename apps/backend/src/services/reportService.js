@@ -5,9 +5,23 @@ const Decimal = require("decimal.js");
 const prisma = new PrismaClient();
 const logger = require("../utils/logger");
 
+//                                                           ▲
+//   NOTE: the ophtalmologist's name can be configured via   █
+//   the OPHTALMOLOGIST_NAME environment variable,           █
+//   defaulting to "محمد خليل" if not set.                   █
+//                                                           ▼
+const OPHTALMOLOGIST_NAME = process.env.OPHTALMOLOGIST_NAME || "محمد خليل";
+
+const isOphtalmologistTx = (tx) => {
+  tx.description.toLowerCase().includes(OPHTALMOLOGIST_NAME.toLowerCase());
+};
+
 /**
  * Computes the aggregated revenue/expense summary for a given month,
  * broken down by ledger category, plus the overall net profit/loss.
+ * Mohammed Khalil the ophtalmologist is counted distinctly in the summary
+ * @param {number} year - The year for which to compute the summary.
+ * @param {number} month - The month (1-12) for which to compute the summary.
  */
 async function getMonthlySummary(year, month) {
   const startDate = new Date(year, month - 1, 1);
@@ -19,10 +33,27 @@ async function getMonthlySummary(year, month) {
 
   let totalInflow = new Decimal(0);
   let totalOutflow = new Decimal(0);
+  let ophtalmologistInflow = new Decimal(0);
+  let ophtalmologistOutflow = new Decimal(0);
   const byCategory = {};
 
   transactions.forEach((tx) => {
     const amount = new Decimal(tx.amount);
+
+    //                                                           ▲
+    //   NOTE: ophtalmologist transactions are tracked           █
+    //   separately and excluded                                 █
+    //   from the general totals and category breakdowns.        █
+    //                                                           ▼
+
+    if (isOphtalmologistTx(tx)) {
+      if (tx.isOutflow) {
+        ophtalmologistOutflow = ophtalmologistOutflow.plus(amount);
+      } else {
+        ophtalmologistInflow = ophtalmologistInflow.plus(amount);
+      }
+      return; // Skip further processing for this transaction
+    }
 
     if (!byCategory[tx.category]) {
       byCategory[tx.category] = {
@@ -33,12 +64,10 @@ async function getMonthlySummary(year, month) {
 
     if (tx.isOutflow) {
       totalOutflow = totalOutflow.plus(amount);
-      byCategory[tx.category].outflow =
-        byCategory[tx.category].outflow.plus(amount);
+      byCategory[tx.category].outflow = byCategory[tx.category].outflow.plus(amount);
     } else {
       totalInflow = totalInflow.plus(amount);
-      byCategory[tx.category].inflow =
-        byCategory[tx.category].inflow.plus(amount);
+      byCategory[tx.category].inflow = byCategory[tx.category].inflow.plus(amount);
     }
   });
 
@@ -54,6 +83,11 @@ async function getMonthlySummary(year, month) {
     totalInflow: totalInflow.toFixed(2),
     totalOutflow: totalOutflow.toFixed(2),
     netProfit: totalInflow.minus(totalOutflow).toFixed(2),
+    ophtalmologist: {
+      inflow: ophtalmologistInflow.toFixed(2),
+      outflow: ophtalmologistOutflow.toFixed(2),
+      net: ophtalmologistInflow.minus(ophtalmologistOutflow).toFixed(2),
+    },
     categoryBreakdown,
     transactionCount: transactions.length,
   };
@@ -67,7 +101,11 @@ async function getMonthlySummary(year, month) {
  * **/
 async function getTotalRevenueAndExpenses(year) {
   const startDate = new Date(year, 0, 1);
-  const endDate = new Date(year, 11, 0, 23, 59, 59);
+  // FIX: The endDate should be the last day of the year, not the first day of the next year.
+  const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+  // NOTE: Ophtalmologist are also excluded from the total revenue and expenses calculations,
+  // as they are tracked separately.
 
   const transactions = await prisma.ledgerTransaction.findMany({
     where: { date: { gte: startDate, lte: endDate } },
@@ -75,9 +113,21 @@ async function getTotalRevenueAndExpenses(year) {
 
   let totalRevenue = new Decimal(0);
   let totalExpenses = new Decimal(0);
+  let ophtalmologistRevenue = new Decimal(0);
+  let ophtalmologistExpenses = new Decimal(0);
 
   transactions.forEach((tx) => {
     const amount = new Decimal(tx.amount);
+
+    if (isOphtalmologistTx(tx)) {
+      if (tx.isOutflow) {
+        ophtalmologistExpenses = ophtalmologistExpenses.plus(amount);
+      } else {
+        ophtalmologistRevenue = ophtalmologistRevenue.plus(amount);
+      }
+      return; // Skip further processing for this transaction
+    }
+
     if (tx.isOutflow) {
       totalExpenses = totalExpenses.plus(amount);
     } else {
@@ -89,6 +139,11 @@ async function getTotalRevenueAndExpenses(year) {
     totalRevenue: totalRevenue.toFixed(2),
     totalExpenses: totalExpenses.toFixed(2),
     netProfit: totalRevenue.minus(totalExpenses).toFixed(2),
+    ophtalmologist: {
+      revenue: ophtalmologistRevenue.toFixed(2),
+      expenses: ophtalmologistExpenses.toFixed(2),
+      net: ophtalmologistRevenue.minus(ophtalmologistExpenses).toFixed(2),
+    },
   };
 }
 
@@ -154,10 +209,21 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
 
   let totalRevenue = new Decimal(0);
   let totalExpenses = new Decimal(0);
+  let ophtalmologistRevenue = new Decimal(0);
+  let ophtalmologistExpenses = new Decimal(0);
   const byCategory = {};
 
   transactions.forEach((tx) => {
     const amount = new Decimal(tx.amount);
+
+    if (isOphtalmologistTx(tx)) {
+      if (tx.isOutflow) {
+        ophtalmologistExpenses = ophtalmologistExpenses.plus(amount);
+      } else {
+        ophtalmologistRevenue = ophtalmologistRevenue.plus(amount);
+      }
+      return; // Skip further processing for this transaction
+    }
 
     if (!byCategory[tx.category]) {
       byCategory[tx.category] = {
@@ -168,12 +234,10 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
 
     if (tx.isOutflow) {
       totalExpenses = totalExpenses.plus(amount);
-      byCategory[tx.category].outflow =
-        byCategory[tx.category].outflow.plus(amount);
+      byCategory[tx.category].outflow = byCategory[tx.category].outflow.plus(amount);
     } else {
       totalRevenue = totalRevenue.plus(amount);
-      byCategory[tx.category].inflow =
-        byCategory[tx.category].inflow.plus(amount);
+      byCategory[tx.category].inflow = byCategory[tx.category].inflow.plus(amount);
     }
   });
   const categoryBreakdown = Object.fromEntries(
@@ -187,6 +251,11 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
     totalRevenue: totalRevenue.toFixed(2),
     totalExpenses: totalExpenses.toFixed(2),
     netProfit: totalRevenue.minus(totalExpenses).toFixed(2),
+    ophtalmologist: {
+      revenue: ophtalmologistRevenue.toFixed(2),
+      expenses: ophtalmologistExpenses.toFixed(2),
+      net: ophtalmologistRevenue.minus(ophtalmologistExpenses).toFixed(2),
+    },
     categoryBreakdown,
   };
 }

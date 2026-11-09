@@ -150,3 +150,15 @@ model LabOrder {
   centerCharge Decimal  @db.Decimal(20, 2) // amount charged to the patient (labCost * 1.4)
   isSettled    Boolean  @default(false) // true once ledger entries are recorded
 }
+
+// ==========================================
+// 5. XRAY WORK
+// =========================================
+
+// The Center takes the entire fee for XRAY work, doctors do not receive any cut.
+// The Center already has an in-house Xray machine, so there is no external lab cost.
+model XrayOrder {
+  id                  String  @id @default(uuid())
+  patientsCount       Int
+  ledgerTransactionId String?
+}
