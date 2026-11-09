@@ -4,17 +4,13 @@ const { PrismaClient } = require("@prisma/client");
 const Decimal = require("decimal.js");
 const prisma = new PrismaClient();
 const logger = require("../utils/logger");
+const { isOphtalmologistTx } = require("../utils/helpers");
 
 //                                                           ▲
 //   NOTE: the ophtalmologist's name can be configured via   █
 //   the OPHTALMOLOGIST_NAME environment variable,           █
 //   defaulting to "محمد خليل" if not set.                   █
 //                                                           ▼
-const OPHTALMOLOGIST_NAME = process.env.OPHTALMOLOGIST_NAME || "محمد خليل";
-
-const isOphtalmologistTx = (tx) => {
-  tx.description.toLowerCase().includes(OPHTALMOLOGIST_NAME.toLowerCase());
-};
 
 /**
  * Computes the aggregated revenue/expense summary for a given month,
@@ -216,6 +212,11 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
   transactions.forEach((tx) => {
     const amount = new Decimal(tx.amount);
 
+    //                                                           ▲
+    //   NOTE: Ophtalmologist transactions are tracked separately█
+    //   and excluded from the general totals and category       █
+    //   breakdowns.                                             █
+    //                                                           ▼
     if (isOphtalmologistTx(tx)) {
       if (tx.isOutflow) {
         ophtalmologistExpenses = ophtalmologistExpenses.plus(amount);
