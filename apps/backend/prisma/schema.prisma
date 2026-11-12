@@ -19,9 +19,10 @@ model Doctor {
   perVisitFee      Decimal @db.Decimal(20, 2) // Guaranteed daily rate (used when avg patients < 5/day)
   revisionFee      Decimal @default(0) @db.Decimal(20, 2) // What the CENTER collects for a revision visit
 
-  tallies         MonthlyTally[]
-  serviceSplits   DoctorServiceSplit[]
-  payoutSnapshots DoctorPayoutSnapshot[]
+  tallies            MonthlyTally[]
+  serviceSplits      DoctorServiceSplit[]
+  payoutSnapshots    DoctorPayoutSnapshot[]
+  ledgerTransactions LedgerTransaction[]
 }
 
 model Service {
@@ -130,9 +131,12 @@ model LedgerTransaction {
   id          String   @id @default(uuid())
   date        DateTime @default(now())
   amount      Decimal  @db.Decimal(20, 2)
+  doctorId    String?
   isOutflow   Boolean
   category    Category
   description String
+
+  doctor Doctor? @relation(fields: [doctorId], references: [id])
 }
 
 // ==========================================

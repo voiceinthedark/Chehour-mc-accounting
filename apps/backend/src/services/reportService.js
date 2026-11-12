@@ -10,6 +10,8 @@ const { isOphtalmologistTx } = require("../utils/helpers");
 //   NOTE: the ophtalmologist's name can be configured via   █
 //   the OPHTALMOLOGIST_NAME environment variable,           █
 //   defaulting to "محمد خليل" if not set.                   █
+//   OPHTALMOLOGIST_ID is also set in the environment
+//   variables to identify the ophtalmologist's transactions.
 //                                                           ▼
 
 /**
