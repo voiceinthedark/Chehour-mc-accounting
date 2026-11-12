@@ -76,6 +76,10 @@ async function getMonthlySummary(year, month) {
     ]),
   );
 
+  logger.info(
+    `Monthly summary for ${year}-${month}: inflow=${totalInflow}, outflow=${totalOutflow}, net=${totalInflow.minus(totalOutflow)}`,
+  );
+
   return {
     period: { year, month },
     totalInflow: totalInflow.toFixed(2),
@@ -99,11 +103,17 @@ async function getMonthlySummary(year, month) {
  * **/
 async function getTotalRevenueAndExpenses(year) {
   const startDate = new Date(year, 0, 1);
-  // FIX: The endDate should be the last day of the year, not the first day of the next year.
+  // ──────────────────────────────────────────────────────────────────────
+  // FIX: The endDate should be the last day of the year, not the first day
+  // of the next year.
+  // ──────────────────────────────────────────────────────────────────────
   const endDate = new Date(year, 11, 31, 23, 59, 59);
 
-  // NOTE: Ophtalmologist are also excluded from the total revenue and expenses calculations,
-  // as they are tracked separately.
+  //          ╭─────────────────────────────────────────────────────────╮
+  //          │  NOTE: Ophtalmologist are also excluded from the total  │
+  //          │           revenue and expenses calculations,            │
+  //          │             as they are tracked separately.             │
+  //          ╰─────────────────────────────────────────────────────────╯
 
   const transactions = await prisma.ledgerTransaction.findMany({
     where: { date: { gte: startDate, lte: endDate } },
@@ -132,6 +142,12 @@ async function getTotalRevenueAndExpenses(year) {
       totalRevenue = totalRevenue.plus(amount);
     }
   });
+
+  logger.info(
+    `Total revenue and expenses for ${year}: revenue=${totalRevenue}, expenses=${totalExpenses}, net=${totalRevenue.minus(
+      totalExpenses,
+    )}`,
+  );
 
   return {
     totalRevenue: totalRevenue.toFixed(2),
