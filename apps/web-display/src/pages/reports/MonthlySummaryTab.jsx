@@ -134,7 +134,7 @@ function MonthlySummaryTab() {
       ) : !summary ? null : (
         <>
           {/* Top KPI cards */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid container spacing={3} wrap="nowrap" sx={{ mb: 4 }}>
             <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
               <Card variant="outlined" sx={{ bgcolor: "#f0fdf4" }}>
                 <CardContent>
