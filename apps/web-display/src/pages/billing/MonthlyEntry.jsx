@@ -17,7 +17,7 @@ import {
 import "@fontsource/almarai";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { API_BILLING_URL, API_RECEPTION_URL } from "../../apiconfig";
+import { API_RECEPTION_URL } from "../../apiconfig";
 
 const MONTH_NAMES = [
   "كانون الثاني",
@@ -98,13 +98,16 @@ export default function MonthlyEntry() {
 
   const handleSaveSettings = async () => {
     try {
-      await axios.put(
-        `${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`,
-        { perPatientFee, doctorPatientCut, perVisitFee, revisionFee },
-      );
+      await axios.put(`${API_RECEPTION_URL}/doctors/${selectedDoctorId}/settings`, {
+        perPatientFee,
+        doctorPatientCut,
+        perVisitFee,
+        revisionFee,
+      });
       toast.success("تم حفظ الاعدادات");
     } catch (err) {
       toast.error("فشل حفظ الاعدادات");
+      console.error("Error saving settings:", err);
     }
   };
 
@@ -137,16 +140,13 @@ export default function MonthlyEntry() {
       toast.success("تم حفظ البيانات الشهرية");
     } catch (err) {
       toast.error("فشل حفظ البيانات الشهرية");
+      console.error("Error submitting monthly tally:", err);
     }
   };
 
   return (
     <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
-      <Typography
-        variant="h4"
-        sx={{ fontFamily: "almarai, sans-serif" }}
-        gutterBottom
-      >
+      <Typography variant="h4" sx={{ fontFamily: "almarai, sans-serif" }} gutterBottom>
         حسابات شهرية للطبيب
       </Typography>
 
@@ -155,20 +155,14 @@ export default function MonthlyEntry() {
         <CardContent>
           <FormControl fullWidth>
             <InputLabel>
-              <Typography
-                variant="h6"
-                sx={{ fontFamily: "Almarai, sans-serif" }}
-              >
+              <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif" }}>
                 اختر الطبيب
               </Typography>
             </InputLabel>
             <Select value={selectedDoctorId} onChange={handleDoctorChange}>
               {doctors.map((doc) => (
                 <MenuItem key={doc.id} value={doc.id}>
-                  <Typography
-                    variant="h5"
-                    sx={{ fontFamily: "Almarai, sans-serif" }}
-                  >
+                  <Typography variant="h5" sx={{ fontFamily: "Almarai, sans-serif" }}>
                     {doc.name}
                   </Typography>
                 </MenuItem>
@@ -233,15 +227,8 @@ export default function MonthlyEntry() {
                   />
                 </Grid>
               </Grid>
-              <Button
-                variant="outlined"
-                sx={{ mt: 2 }}
-                onClick={handleSaveSettings}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{ fontFamily: "Almarai, sans-serif" }}
-                >
+              <Button variant="outlined" sx={{ mt: 2 }} onClick={handleSaveSettings}>
+                <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif" }}>
                   حفظ الاعدادات
                 </Typography>
               </Button>
@@ -251,32 +238,18 @@ export default function MonthlyEntry() {
           {/* 3. MONTHLY DATA ENTRY */}
           <Card>
             <CardContent>
-              <Typography
-                variant="h6"
-                sx={{ fontFamily: "almarai, sans-serif" }}
-                gutterBottom
-              >
+              <Typography variant="h6" sx={{ fontFamily: "almarai, sans-serif" }} gutterBottom>
                 بيانات شهرية للطبيب
               </Typography>
               <Grid container spacing={3} sx={{ mb: 3 }}>
                 {/* Month Selector */}
                 <Grid item xs={12} sm={3}>
                   <FormControl fullWidth>
-                    <InputLabel sx={{ fontFamily: "Almarai, sans-serif" }}>
-                      الشهر
-                    </InputLabel>
-                    <Select
-                      value={month}
-                      label="الشهر"
-                      onChange={(e) => setMonth(e.target.value)}
-                    >
+                    <InputLabel sx={{ fontFamily: "Almarai, sans-serif" }}>الشهر</InputLabel>
+                    <Select value={month} label="الشهر" onChange={(e) => setMonth(e.target.value)}>
                       {MONTH_NAMES.map((name, i) => (
                         <MenuItem key={i + 1} value={i + 1}>
-                          <Typography
-                            sx={{ fontFamily: "Almarai, sans-serif" }}
-                          >
-                            {name}
-                          </Typography>
+                          <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>{name}</Typography>
                         </MenuItem>
                       ))}
                     </Select>
@@ -399,11 +372,7 @@ export default function MonthlyEntry() {
                     justifyContent: "flex-end",
                   }}
                 >
-                  <Grid
-                    item
-                    xs={6}
-                    sx={{ display: "flex", alignItems: "center" }}
-                  >
+                  <Grid item xs={6} sx={{ display: "flex", alignItems: "center" }}>
                     <Typography
                       variant="body1"
                       sx={{
@@ -431,11 +400,7 @@ export default function MonthlyEntry() {
                       inputProps={{ min: 0 }}
                       value={serviceCounts[service.id]?.regularCount || ""}
                       onChange={(e) =>
-                        handleServiceCountChange(
-                          service.id,
-                          "regularCount",
-                          e.target.value,
-                        )
+                        handleServiceCountChange(service.id, "regularCount", e.target.value)
                       }
                     />
                   </Grid>
@@ -448,11 +413,7 @@ export default function MonthlyEntry() {
                       inputProps={{ min: 0 }}
                       value={serviceCounts[service.id]?.charityCount || ""}
                       onChange={(e) =>
-                        handleServiceCountChange(
-                          service.id,
-                          "charityCount",
-                          e.target.value,
-                        )
+                        handleServiceCountChange(service.id, "charityCount", e.target.value)
                       }
                     />
                   </Grid>
@@ -468,10 +429,7 @@ export default function MonthlyEntry() {
                 fullWidth
                 onClick={handleSubmitTally}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ fontFamily: "Almarai, sans-serif" }}
-                >
+                <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif" }}>
                   حفظ البيانات الشهرية
                 </Typography>
               </Button>

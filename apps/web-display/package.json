@@ -1,7 +1,7 @@
 {
-  "name": "web-display",
+  "name": "@chehour/web",
+  "version": "0.35.02",
   "private": true,
-  "version": "0.34.07",
   "type": "module",
   "scripts": {
     "dev": "vite",

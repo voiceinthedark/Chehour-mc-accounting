@@ -20,10 +20,7 @@ import PieChartWidget from "../../components/Widgets/PieChartWidget";
 import MonthYearSelector from "../../components/MonthYearSelector";
 import DollarPill from "../../components/Pills/DollarPill";
 import { API_REPORTS_URL } from "../../apiconfig";
-import {
-  formatLebaneseToDollar,
-  getCurrencyFromLocalStorage,
-} from "../../utils/utilities";
+import { formatLebaneseToDollar, getCurrencyFromLocalStorage } from "../../utils/utilities";
 
 const CATEGORY_LABELS = {
   PATIENT_FEE: "رسوم المرضى",
@@ -50,10 +47,9 @@ function MonthlySummaryTab() {
   const fetchSummary = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `${API_REPORTS_URL}/monthly-summary/${year}/${month}`,
-      );
+      const res = await axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}`);
       setSummary(res.data);
+      console.log(res.data);
     } catch {
       toast.error("فشل تحميل الملخص المالي");
     } finally {
@@ -64,9 +60,7 @@ function MonthlySummaryTab() {
   const fetchSummaryWithDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `${API_REPORTS_URL}/monthly-summary/${year}/${month}/details`,
-      );
+      const res = await axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}/details`);
       setSummaryWithDetails(res.data);
     } catch {
       toast.error("فشل تحميل الملخص المالي مع التفاصيل");
@@ -106,24 +100,22 @@ function MonthlySummaryTab() {
 
   const pieChartData = summaryWithDetails
     ? [
-        Object.entries(summaryWithDetails.categoryBreakdown).map(
-          ([cat, vals]) => ({
-            id: CATEGORY_LABELS[cat] ?? cat,
-            label: CATEGORY_LABELS[cat] ?? cat,
-            value: Number(vals.inflow) + Number(vals.outflow),
-          }),
-        ),
-      ]
+      Object.entries(summaryWithDetails.categoryBreakdown).map(([cat, vals]) => ({
+        id: CATEGORY_LABELS[cat] ?? cat,
+        label: CATEGORY_LABELS[cat] ?? cat,
+        value: Number(vals.inflow) + Number(vals.outflow),
+      })),
+    ]
     : [];
 
   const pieChartDataForDoctors = doctorSummary
     ? [
-        Object.entries(doctorSummary.transactions).map(([id, vals]) => ({
-          id: vals.id,
-          label: vals.doctor.name,
-          value: Number(vals.financials.totalOwed),
-        })),
-      ]
+      Object.entries(doctorSummary.transactions).map(([id, vals]) => ({
+        id: vals.id,
+        label: vals.doctor.name,
+        value: Number(vals.financials.totalOwed),
+      })),
+    ]
     : [];
 
   return (
@@ -155,11 +147,7 @@ function MonthlySummaryTab() {
                   >
                     إجمالي الإيرادات
                   </Typography>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    sx={{ color: "success.dark" }}
-                  >
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "success.dark" }}>
                     {Number(summary.totalInflow).toLocaleString()}
                   </Typography>
                   <DollarPill
@@ -192,11 +180,7 @@ function MonthlySummaryTab() {
                   >
                     إجمالي المصاريف
                   </Typography>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
-                    sx={{ color: "error.dark" }}
-                  >
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "error.dark" }}>
                     {Number(summary.totalOutflow).toLocaleString()}
                   </Typography>
                   <DollarPill
@@ -218,10 +202,7 @@ function MonthlySummaryTab() {
               </Card>
             </Grid>
             <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
-              <Card
-                variant="outlined"
-                sx={{ bgcolor: netIsPositive ? "#eff6ff" : "#fff7ed" }}
-              >
+              <Card variant="outlined" sx={{ bgcolor: netIsPositive ? "#eff6ff" : "#fff7ed" }}>
                 <CardContent>
                   <Typography
                     variant="caption"
@@ -242,10 +223,45 @@ function MonthlySummaryTab() {
                     {Number(summary.netProfit).toLocaleString()}
                   </Typography>
                   <DollarPill
-                    amountInDollars={formatLebaneseToDollar(
-                      summary.netProfit / localCurrencyRate,
-                    )}
+                    amountInDollars={formatLebaneseToDollar(summary.netProfit / localCurrencyRate)}
                     position={"top-right"}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "text.secondary",
+                    }}
+                  >
+                    ل.ل
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
+              <Card variant="outlined" sx={{ bgcolor: "#f0fdf8" }}>
+                <CardContent>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "success.dark",
+                    }}
+                  >
+                    صافي مدخول طبيب العيون
+                  </Typography>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "success.dark" }}>
+                    {summary.ophtalmologist
+                      ? Number(summary.ophtalmologist.net).toLocaleString()
+                      : "—"}
+                  </Typography>
+                  <DollarPill
+                    position={"top-right"}
+                    amountInDollars={
+                      summary.ophtalmologist
+                        ? formatLebaneseToDollar(summary.ophtalmologist.net / localCurrencyRate)
+                        : "—"
+                    }
                   />
                   <Typography
                     variant="caption"
@@ -268,10 +284,7 @@ function MonthlySummaryTab() {
                 <TableHead>
                   <TableRow sx={{ bgcolor: "#f0f4f8" }}>
                     <TableCell>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontFamily: "Almarai, sans-serif" }}
-                      >
+                      <Typography variant="subtitle2" sx={{ fontFamily: "Almarai, sans-serif" }}>
                         الفئة
                       </Typography>
                     </TableCell>
@@ -300,107 +313,151 @@ function MonthlySummaryTab() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.entries(summary.categoryBreakdown).map(
-                    ([cat, vals]) => (
-                      <TableRow key={cat} hover>
-                        <TableCell>
+                  {Object.entries(summary.categoryBreakdown).map(([cat, vals]) => (
+                    <TableRow key={cat} hover>
+                      <TableCell>
+                        <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+                          {CATEGORY_LABELS[cat] ?? cat}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color: Number(vals.inflow) > 0 ? "success.dark" : "text.disabled",
+                          }}
+                        >
+                          {Number(vals.inflow) > 0 ? Number(vals.inflow).toLocaleString() : "—"}
+                        </Typography>
+                        {Number(vals.inflow) > 0 && (
                           <Typography
-                            sx={{ fontFamily: "Almarai, sans-serif" }}
-                          >
-                            {CATEGORY_LABELS[cat] ?? cat}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Typography
+                            variant="caption"
                             sx={{
-                              color:
-                                Number(vals.inflow) > 0
-                                  ? "success.dark"
-                                  : "text.disabled",
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
                             }}
                           >
-                            {Number(vals.inflow) > 0
-                              ? Number(vals.inflow).toLocaleString()
-                              : "—"}
+                            ({formatLebaneseToDollar(vals.inflow / localCurrencyRate)})
                           </Typography>
-                          {Number(vals.inflow) > 0 && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontFamily: "Almarai, sans-serif",
-                                color: "text.secondary",
-                              }}
-                            >
-                              (
-                              {formatLebaneseToDollar(
-                                vals.inflow / localCurrencyRate,
-                              )}
-                              )
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="right">
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color: Number(vals.outflow) > 0 ? "error.dark" : "text.disabled",
+                          }}
+                        >
+                          {Number(vals.outflow) > 0 ? Number(vals.outflow).toLocaleString() : "—"}
+                        </Typography>
+                        {Number(vals.outflow) > 0 && (
                           <Typography
+                            variant="caption"
                             sx={{
-                              color:
-                                Number(vals.outflow) > 0
-                                  ? "error.dark"
-                                  : "text.disabled",
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
                             }}
                           >
-                            {Number(vals.outflow) > 0
-                              ? Number(vals.outflow).toLocaleString()
-                              : "—"}
+                            ({formatLebaneseToDollar(vals.outflow / localCurrencyRate)})
                           </Typography>
-                          {Number(vals.outflow) > 0 && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontFamily: "Almarai, sans-serif",
-                                color: "text.secondary",
-                              }}
-                            >
-                              (
-                              {formatLebaneseToDollar(
-                                vals.outflow / localCurrencyRate,
-                              )}
-                              )
-                            </Typography>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ),
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {/* Ophtalmologist row */}
+                  {summary.ophtalmologist && (
+                    <TableRow hover>
+                      <TableCell>
+                        <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
+                          {process.env.OPHTALMOLOGIST_NAME || "الطبيب العيون"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color:
+                              Number(summary.ophtalmologist.inflow) > 0
+                                ? "success.dark"
+                                : "text.disabled",
+                          }}
+                        >
+                          {Number(summary.ophtalmologist.inflow) > 0
+                            ? Number(summary.ophtalmologist.inflow).toLocaleString()
+                            : "—"}
+                        </Typography>
+                        {Number(summary.ophtalmologist.inflow) > 0 && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
+                            }}
+                          >
+                            (
+                            {formatLebaneseToDollar(
+                              summary.ophtalmologist.inflow / localCurrencyRate,
+                            )}
+                            )
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color:
+                              Number(summary.ophtalmologist.outflow) > 0
+                                ? "error.dark"
+                                : "text.disabled",
+                          }}
+                        >
+                          {Number(summary.ophtalmologist.outflow) > 0
+                            ? Number(summary.ophtalmologist.outflow).toLocaleString()
+                            : "—"}
+                        </Typography>
+                        {Number(summary.ophtalmologist.outflow) > 0 && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
+                            }}
+                          >
+                            (
+                            {formatLebaneseToDollar(
+                              summary.ophtalmologist.outflow / localCurrencyRate,
+                            )}
+                            )
+                          </Typography>
+                        )}
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
 
-          {summaryWithDetails &&
-            Object.keys(summary.categoryBreakdown).length > 0 && (
-              <Box
-                sx={{
-                  mt: 4,
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 4,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <PieChartWidget
-                  data={pieChartData[0]}
-                  title="توزيع الإيرادات والمصاريف حسب الفئة"
-                  donut
-                />
-                <PieChartWidget
-                  data={pieChartDataForDoctors[0]}
-                  title="توزيع المدفوعات حسب الطبيب"
-                  donut
-                />
-              </Box>
-            )}
-
+          {summaryWithDetails && Object.keys(summary.categoryBreakdown).length > 0 && (
+            <Box
+              sx={{
+                mt: 4,
+                display: "flex",
+                flexDirection: "row",
+                gap: 4,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <PieChartWidget
+                data={pieChartData[0]}
+                title="توزيع الإيرادات والمصاريف حسب الفئة"
+                donut
+              />
+              <PieChartWidget
+                data={pieChartDataForDoctors[0]}
+                title="توزيع المدفوعات حسب الطبيب"
+                donut
+              />
+            </Box>
+          )}
           {Object.keys(summary.categoryBreakdown).length === 0 && (
             <Typography
               sx={{
