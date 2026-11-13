@@ -26,4 +26,15 @@ const isOphtalmologistTx = (tx) => {
   }
 };
 
-module.exports = { isOphtalmologistTx };
+// ──────────────────────────────────────────────────────────────────────
+// NOTE: X-ray helper functions to identify X-ray related transactions
+// based on their categories.
+// ──────────────────────────────────────────────────────────────────────
+
+const XRAY_CATEGORIES = ["XRAY_REVENUE", "XRAY_EXPENSE"];
+
+const isXrayTx = (tx) => {
+  XRAY_CATEGORIES.includes(tx.category);
+};
+
+module.exports = { isOphtalmologistTx, isXrayTx, OPHTALMOLOGIST_NAME, OPHTALMOLOGIST_ID };

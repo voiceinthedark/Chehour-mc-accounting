@@ -7,12 +7,7 @@ const prisma = new PrismaClient();
 /**
  * Calculates a doctor's payout for a specific month.
  */
-async function calculateMonthlyDoctorPayout(
-  doctorId,
-  year,
-  month,
-  existingTally = null,
-) {
+async function calculateMonthlyDoctorPayout(doctorId, year, month, existingTally = null) {
   // 1. Fetch the aggregated monthly tally if one was not provided
   let tally = existingTally;
   if (!tally) {
@@ -27,16 +22,13 @@ async function calculateMonthlyDoctorPayout(
     });
   }
 
-  if (!tally)
-    return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
+  if (!tally) return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
 
   const doctor = tally.doctor;
   const totalVisits = tally.totalVisits;
 
   // Build a quick lookup of per-doctor service overrides
-  const splitOverrides = new Map(
-    doctor.serviceSplits.map((s) => [s.serviceId, s]),
-  );
+  const splitOverrides = new Map(doctor.serviceSplits.map((s) => [s.serviceId, s]));
 
   let totalPatients = tally.regularPatients + tally.charityPatients;
   let servicePayout = new Decimal(0);
@@ -48,9 +40,7 @@ async function calculateMonthlyDoctorPayout(
 
   // doctorPatientCut: what the doctor earns per patient (may differ from perPatientFee
   // which is the center's collection rate)
-  const doctorPatientCut = new Decimal(
-    doctor.doctorPatientCut ?? doctor.perPatientFee,
-  );
+  const doctorPatientCut = new Decimal(doctor.doctorPatientCut ?? doctor.perPatientFee);
   const centerPatientFee = new Decimal(doctor.perPatientFee);
 
   let consultationPay = new Decimal(0);
@@ -67,10 +57,7 @@ async function calculateMonthlyDoctorPayout(
     // the doctor for the same visits.
     const remainingVisits = totalVisits - coveredVisits;
     const guaranteedPay = new Decimal(doctor.perVisitFee).mul(coveredVisits);
-    const patientPay =
-      remainingVisits > 0
-        ? doctorPatientCut.mul(totalPatients)
-        : new Decimal(0);
+    const patientPay = remainingVisits > 0 ? doctorPatientCut.mul(totalPatients) : new Decimal(0);
     consultationPay = guaranteedPay.plus(patientPay);
     appliedRule = "MIXED";
 
@@ -85,29 +72,18 @@ async function calculateMonthlyDoctorPayout(
 
     // Net cost to center for covered days = what it paid doctor − what it collected from patients those days
     const coveredPatients = tally.coveredPatients ?? 0;
-    const coveredDayNetCost = guaranteedPay.minus(
-      centerPatientFee.mul(coveredPatients),
-    );
-    totalCharityCost = coveredDayNetCost.gt(0)
-      ? coveredDayNetCost
-      : new Decimal(0);
+    const coveredDayNetCost = guaranteedPay.minus(centerPatientFee.mul(coveredPatients));
+    totalCharityCost = coveredDayNetCost.gt(0) ? coveredDayNetCost : new Decimal(0);
     // Center also covers the doctor's cut for charity patients on normal days
     if (remainingVisits > 0 && tally.charityPatients > 0) {
-      totalCharityCost = totalCharityCost.plus(
-        doctorPatientCut.mul(tally.charityPatients),
-      );
+      totalCharityCost = totalCharityCost.plus(doctorPatientCut.mul(tally.charityPatients));
     }
-  } else if (
-    isPerVisitDoctor &&
-    (totalVisits === 0 || totalPatients < totalVisits * 5)
-  ) {
+  } else if (isPerVisitDoctor && (totalVisits === 0 || totalPatients < totalVisits * 5)) {
     // Per-visit rule: all visits fell under the threshold — doctor paid per day
     consultationPay = new Decimal(doctor.perVisitFee).mul(totalVisits);
     appliedRule = "PER_VISIT_FEE";
     // Center's loss = what it pays the doctor minus what it collects from real patients
-    totalCharityCost = consultationPay.minus(
-      centerPatientFee.mul(tally.regularPatients),
-    );
+    totalCharityCost = consultationPay.minus(centerPatientFee.mul(tally.regularPatients));
     if (totalCharityCost.lt(0)) totalCharityCost = new Decimal(0);
     // For stats, only real patients count
     totalPatients = tally.regularPatients;
@@ -117,18 +93,17 @@ async function calculateMonthlyDoctorPayout(
     appliedRule = "PER_PATIENT_FEE";
     // Center covers the doctor's cut for charity patients
     if (tally.charityPatients > 0) {
-      totalCharityCost = totalCharityCost.plus(
-        doctorPatientCut.mul(tally.charityPatients),
-      );
+      totalCharityCost = totalCharityCost.plus(doctorPatientCut.mul(tally.charityPatients));
     }
   }
 
-  // NOTE: Added Revisions
-  // Revisions: doctor is paid revisionFee each; the Center collects nothing
+  //          ╭─────────────────────────────────────────────────────────╮
+  //          │                  NOTE: Added Revisions                  │
+  //          │ Revisions: doctor is paid revisionFee each; the Center  │
+  //          │                    collects nothing                     │
+  //          ╰─────────────────────────────────────────────────────────╯
   const revisionPatients = tally.revisionPatients ?? 0;
-  const revisionPay = new Decimal(doctor.revisionFee ?? 0).mul(
-    revisionPatients,
-  );
+  const revisionPay = new Decimal(doctor.revisionFee ?? 0).mul(revisionPatients);
 
   // 3. Process EKG, Echo, Ultrasound, etc., for this month
   let totalServiceRevenue = new Decimal(0);
@@ -206,12 +181,7 @@ async function calculateMonthlyDoctorPayout(
  * Returns the locked payout snapshot for a paid month, or a live
  * recalculation if the month has not yet been paid out.
  */
-async function getDoctorPayoutDetails(
-  doctorId,
-  year,
-  month,
-  existingTally = null,
-) {
+async function getDoctorPayoutDetails(doctorId, year, month, existingTally = null) {
   let tally = existingTally;
   if (!tally) {
     tally = await prisma.monthlyTally.findUnique({
@@ -223,8 +193,7 @@ async function getDoctorPayoutDetails(
     });
   }
 
-  if (!tally)
-    return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
+  if (!tally) return { totalOwed: "0.00", message: "لا يوجد مستحقات لهذا الشهر" };
 
   // If this month is already paid out, return the saved snapshot so the
   // user always sees the numbers that were actually paid.
@@ -323,12 +292,7 @@ async function confirmDoctorPayout(doctorId, year, month) {
     };
   }
 
-  const payout = await calculateMonthlyDoctorPayout(
-    doctorId,
-    year,
-    month,
-    tally,
-  );
+  const payout = await calculateMonthlyDoctorPayout(doctorId, year, month, tally);
 
   if (!payout.financials || new Decimal(payout.financials.totalOwed).lte(0)) {
     return payout; // Nothing to pay out
@@ -336,8 +300,7 @@ async function confirmDoctorPayout(doctorId, year, month) {
 
   const payoutDate = new Date(year, month - 1, 1);
   const doctor = tally.doctor;
-  const payingPatients =
-    (tally.regularPatients ?? 0) + (tally.coveredPatients ?? 0);
+  const payingPatients = (tally.regularPatients ?? 0) + (tally.coveredPatients ?? 0);
   const patientRevenue = new Decimal(doctor.perPatientFee).mul(payingPatients);
 
   const operations = [

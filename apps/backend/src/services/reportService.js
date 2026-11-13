@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const Decimal = require("decimal.js");
 const prisma = new PrismaClient();
 const logger = require("../utils/logger");
-const { isOphtalmologistTx } = require("../utils/helpers");
+const { isOphtalmologistTx, isXrayTx } = require("../utils/helpers");
 
 //                                                           ▲
 //   NOTE: the ophtalmologist's name can be configured via   █
@@ -33,6 +33,9 @@ async function getMonthlySummary(year, month) {
   let totalOutflow = new Decimal(0);
   let ophtalmologistInflow = new Decimal(0);
   let ophtalmologistOutflow = new Decimal(0);
+  // NOTE: Xray transactions are tracked separately and excluded from general totals and category breakdowns.
+  let xrayInflow = new Decimal(0); // Track X-ray inflow separately
+  let xrayOutflow = new Decimal(0); // Track X-ray outflow separately
   const byCategory = {};
 
   transactions.forEach((tx) => {
@@ -51,6 +54,13 @@ async function getMonthlySummary(year, month) {
         ophtalmologistInflow = ophtalmologistInflow.plus(amount);
       }
       return; // Skip further processing for this transaction
+    }
+
+    // ── NOTE: X_RAY Tracking ────────────────────────────────────────────
+    if (isXrayTx(tx)) {
+      if (tx.isOutflow) xrayOutflow = xrayOutflow.plus(amount);
+      else xrayInflow = xrayInflow.plus(amount);
+      return; // excluded from clinic totals and category breakdown
     }
 
     if (!byCategory[tx.category]) {
@@ -90,6 +100,11 @@ async function getMonthlySummary(year, month) {
       outflow: ophtalmologistOutflow.toFixed(2),
       net: ophtalmologistInflow.minus(ophtalmologistOutflow).toFixed(2),
     },
+    xray: {
+      inflow: xrayInflow.toFixed(2),
+      outflow: xrayOutflow.toFixed(2),
+      net: xrayInflow.minus(xrayOutflow).toFixed(2),
+    },
     categoryBreakdown,
     transactionCount: transactions.length,
   };
@@ -123,6 +138,8 @@ async function getTotalRevenueAndExpenses(year) {
   let totalExpenses = new Decimal(0);
   let ophtalmologistRevenue = new Decimal(0);
   let ophtalmologistExpenses = new Decimal(0);
+  let xrayRevenue = new Decimal(0);
+  let xrayExpenses = new Decimal(0);
 
   transactions.forEach((tx) => {
     const amount = new Decimal(tx.amount);
@@ -132,6 +149,15 @@ async function getTotalRevenueAndExpenses(year) {
         ophtalmologistExpenses = ophtalmologistExpenses.plus(amount);
       } else {
         ophtalmologistRevenue = ophtalmologistRevenue.plus(amount);
+      }
+      return; // Skip further processing for this transaction
+    }
+
+    if (isXrayTx(tx)) {
+      if (tx.isOutflow) {
+        xrayExpenses = xrayExpenses.plus(amount);
+      } else {
+        xrayRevenue = xrayRevenue.plus(amount);
       }
       return; // Skip further processing for this transaction
     }
@@ -157,6 +183,11 @@ async function getTotalRevenueAndExpenses(year) {
       revenue: ophtalmologistRevenue.toFixed(2),
       expenses: ophtalmologistExpenses.toFixed(2),
       net: ophtalmologistRevenue.minus(ophtalmologistExpenses).toFixed(2),
+    },
+    xray: {
+      revenue: xrayRevenue.toFixed(2),
+      expenses: xrayExpenses.toFixed(2),
+      net: xrayRevenue.minus(xrayExpenses).toFixed(2),
     },
   };
 }
@@ -225,6 +256,8 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
   let totalExpenses = new Decimal(0);
   let ophtalmologistRevenue = new Decimal(0);
   let ophtalmologistExpenses = new Decimal(0);
+  let xrayRevenue = new Decimal(0);
+  let xrayExpenses = new Decimal(0);
   const byCategory = {};
 
   transactions.forEach((tx) => {
@@ -240,6 +273,15 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
         ophtalmologistExpenses = ophtalmologistExpenses.plus(amount);
       } else {
         ophtalmologistRevenue = ophtalmologistRevenue.plus(amount);
+      }
+      return; // Skip further processing for this transaction
+    }
+
+    if (isXrayTx(tx)) {
+      if (tx.isOutflow) {
+        xrayExpenses = xrayExpenses.plus(amount);
+      } else {
+        xrayRevenue = xrayRevenue.plus(amount);
       }
       return; // Skip further processing for this transaction
     }
@@ -275,6 +317,11 @@ async function getTotalRevenueAndExpensesWithCategoryBreakdown(year) {
       expenses: ophtalmologistExpenses.toFixed(2),
       net: ophtalmologistRevenue.minus(ophtalmologistExpenses).toFixed(2),
     },
+    xray: {
+      revenue: xrayRevenue.toFixed(2),
+      expenses: xrayExpenses.toFixed(2),
+      net: xrayRevenue.minus(xrayExpenses).toFixed(2),
+    },
     categoryBreakdown,
   };
 }
@@ -308,10 +355,14 @@ async function getYearlySummary(year) {
   //                                                           ▼
   const ophtalmologistSummaries = [];
 
+  // NOTE: Also tracking X-ray summaries separately for the year
+  const xraySummaries = []; // Track X-ray summaries separately
+
   for (let month = 1; month <= 12; month++) {
     const summary = await getMonthlySummary(year, month);
     monthlySummaries.push(summary);
     ophtalmologistSummaries.push(summary.ophtalmologist);
+    xraySummaries.push(summary.xray); // Track X-ray summaries separately
   }
 
   // Get the total revenue and expenses for the year
@@ -321,6 +372,7 @@ async function getYearlySummary(year) {
     totals,
     monthly: monthlySummaries,
     ophtalmologist: ophtalmologistSummaries,
+    xray: xraySummaries, // Include X-ray summaries in the yearly summary
   };
 }
 

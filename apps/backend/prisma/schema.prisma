@@ -125,6 +125,8 @@ enum Category {
   LAB_REVENUE
   CHARITY_EXPENSE
   GENERAL_EXPENSE
+  XRAY_REVENUE
+  XRAY_EXPENSE
 }
 
 model LedgerTransaction {
