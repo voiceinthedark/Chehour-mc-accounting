@@ -1,10 +1,7 @@
 // filepath: apps/backend/src/utils/helpers.js
 
 require("dotenv").config();
-
-// NOTE: The ophtalmologist name is stored in the environment variable OPHTALMOLOGIST_NAME.
-const OPHTALMOLOGIST_NAME = process.env.OPHTALMOLOGIST_NAME || "محمد خليل";
-const OPHTALMOLOGIST_ID = process.env.OPHTALMOLOGIST_ID || "a0be8dc6-133c-4d30-be1d-9b79deda36d7";
+const { OPHTALMOLOGIST_NAME, OPHTALMOLOGIST_ID } = require("@chehour/utils");
 
 /**
  * Checks if a transaction is related to the ophtalmologist.
