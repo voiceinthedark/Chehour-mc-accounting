@@ -22,7 +22,11 @@ const YearlySummaryTab = () => {
   const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
   const [yearlyData, setYearlyData] = useState([]); // State to hold the yearly data for the line chart
   const [ophtalmologistData, setOphtalmologistData] = useState([]); // State to hold the ophtalmologist data for the line chart
+  const [xrayData, setXrayData] = useState([]); // State to hold the x-ray data for the line chart
 
+  //          ╭─────────────────────────────────────────────────────────╮
+  //          │    Yearly data fetching function for the line chart     │
+  //          ╰─────────────────────────────────────────────────────────╯
   const fetchYearlyData = useCallback(async () => {
     try {
       const response = await axios.get(`${API_REPORTS_URL}/yearly-summary/${year}`);
@@ -43,6 +47,9 @@ const YearlySummaryTab = () => {
     }
   }, [year]);
 
+  //          ╭─────────────────────────────────────────────────────────╮
+  //          │          Ophtalmologist data fetching function          │
+  //          ╰─────────────────────────────────────────────────────────╯
   const fetchOphtalmologistData = useCallback(async () => {
     try {
       const response = await axios.get(`${API_REPORTS_URL}/yearly-summary/${year}`);
@@ -57,6 +64,26 @@ const YearlySummaryTab = () => {
     } catch (error) {
       console.error("Error fetching ophtalmologist data for line chart:", error);
       toast.error("حدث خطأ أثناء جلب بيانات طبيب العيون للرسم البياني.");
+    }
+  }, [year]);
+
+  //          ╭─────────────────────────────────────────────────────────╮
+  //          │               XRAY data fetching function               │
+  //          ╰─────────────────────────────────────────────────────────╯
+  const fetchXrayData = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_REPORTS_URL}/yearly-summary/${year}`);
+      const monthlyData = response.data.monthly;
+
+      setXrayData(
+        monthlyData.map((item) => ({
+          month: monthArabic[item.period.month] || item.period.month,
+          net: parseFloat(item.xray?.net || 0),
+        })),
+      );
+    } catch (error) {
+      console.error("Error fetching x-ray data for line chart:", error);
+      toast.error("حدث خطأ أثناء جلب بيانات الأشعة للرسم البياني.");
     }
   }, [year]);
 
@@ -81,7 +108,8 @@ const YearlySummaryTab = () => {
     fetchSummaryData();
     fetchYearlyData(); // Fetch the yearly data for the line chart
     fetchOphtalmologistData(); // Fetch the ophtalmologist data for the line chart
-  }, [year, fetchYearlyData, fetchOphtalmologistData]);
+    fetchXrayData(); // Fetch the x-ray data for the line chart
+  }, [year, fetchYearlyData, fetchOphtalmologistData, fetchXrayData]);
 
   return (
     <div style={{ padding: "2rem", maxWidth: "960px", margin: "0 auto" }}>
@@ -425,6 +453,121 @@ const YearlySummaryTab = () => {
               }
             />
           </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            sx={{ mb: 2, textAlign: "center", backgroundColor: "#f5f5f5", borderRadius: "8px" }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                textAlign: "center",
+                backgroundColor: "rgb(0, 173, 0, 0.3)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                position: "relative",
+              }}
+              variant="outlined"
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(51, 133, 10)",
+                }}
+              >
+                مدخول الأشعة
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(51, 133, 90)",
+                }}
+              >
+                {summaryData.xray ? formatCurrencyToLebanese(summaryData.xray.revenue) : "—"}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            sx={{ mb: 2, textAlign: "center", backgroundColor: "#f5f5f5", borderRadius: "8px" }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                textAlign: "center",
+                backgroundColor: "#ffebee",
+                opacity: summaryData.xray?.expenses > summaryData.xray?.revenue ? 0.8 : 1,
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                position: "relative",
+              }}
+              variant="outlined"
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(255, 0, 0)",
+                }}
+              >
+                مصاريف الأشعة
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(255, 0, 0)",
+                }}
+              >
+                {summaryData.xray ? formatCurrencyToLebanese(summaryData.xray.expenses) : "—"}
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            sx={{ mb: 2, textAlign: "center", backgroundColor: "#f5f5f5", borderRadius: "8px" }}
+          >
+            <Box
+              sx={{
+                p: 2,
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                textAlign: "center",
+                backgroundColor: "rgb(0, 0, 155, 0.1)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                position: "relative",
+              }}
+              variant="outlined"
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Almarai, sans-serif",
+                  color: "rgb(0, 0, 100)",
+                }}
+              >
+                رصيد الأشعة
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "montserrat, sans-serif",
+                  color: "rgb(0, 0, 100)",
+                }}
+              >
+                {summaryData.xray ? formatCurrencyToLebanese(summaryData.xray.net) : "—"}
+              </Typography>
+            </Box>
+          </Grid>
           <Box sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom sx={{ fontFamily: "Almarai, sans-serif", mb: 2 }}>
               ملخص الإيرادات والمصاريف على مدار السنة
@@ -464,6 +607,12 @@ const YearlySummaryTab = () => {
                     data: ophtalmologistData.map((item) => item.net),
                     label: "رصيد طبيب العيون",
                     color: "rgb(0, 173, 0)",
+                    area: true,
+                  },
+                  {
+                    data: xrayData.map((item) => item.net),
+                    label: "رصيد الأشعة",
+                    color: "rgb(255, 165, 0)",
                     area: true,
                   },
                 ]}
