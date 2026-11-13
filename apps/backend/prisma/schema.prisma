@@ -138,7 +138,8 @@ model LedgerTransaction {
   category    Category
   description String
 
-  doctor Doctor? @relation(fields: [doctorId], references: [id])
+  doctor    Doctor?    @relation(fields: [doctorId], references: [id])
+  xrayOrder XrayOrder?
 }
 
 // ==========================================
@@ -164,7 +165,11 @@ model LabOrder {
 // The Center takes the entire fee for XRAY work, doctors do not receive any cut.
 // The Center already has an in-house Xray machine, so there is no external lab cost.
 model XrayOrder {
-  id                  String  @id @default(uuid())
+  id                  String             @id @default(uuid())
+  date                DateTime           @default(now())
   patientsCount       Int
-  ledgerTransactionId String?
+  pricePerPatient     Decimal            @db.Decimal(20, 2)
+  totalAmount         Decimal            @db.Decimal(20, 2) // patientsCount * pricePerPatient
+  ledgerTransactionId String?            @unique
+  ledgerTransaction   LedgerTransaction? @relation(fields: [ledgerTransactionId], references: [id])
 }

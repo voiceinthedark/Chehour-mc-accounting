@@ -10,6 +10,7 @@ const billingRoutes = require("./routes/billing");
 const labRoutes = require("./routes/lab");
 const ledgerRoutes = require("./routes/ledger");
 const reportsRoutes = require("./routes/reports");
+const xrayRoutes = require("./routes/xray");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -23,6 +24,7 @@ app.use("/api/billing", billingRoutes);
 app.use("/api/lab", labRoutes);
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/xray", xrayRoutes);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
