@@ -21,7 +21,7 @@ import MonthYearSelector from "../../components/MonthYearSelector";
 import DollarPill from "../../components/Pills/DollarPill";
 import { API_REPORTS_URL } from "../../apiconfig";
 import { formatLebaneseToDollar, getCurrencyFromLocalStorage } from "../../utils/utilities";
-import { OPHTALMOLOGIST_NAME } from "@chehour/backend/utils/helpers";
+import { OPHTALMOLOGIST_NAME } from "@chehour/utils";
 
 const CATEGORY_LABELS = {
   PATIENT_FEE: "رسوم المرضى",
