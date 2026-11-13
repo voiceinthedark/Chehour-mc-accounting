@@ -302,10 +302,16 @@ async function getMonthlySummaryWithDoctorDetails(year, month) {
  * */
 async function getYearlySummary(year) {
   const monthlySummaries = [];
+  //                                                           ▲
+  //   NOTE: We also want to track the ophtalmologist's        █
+  //   monthly summaries separately                            █
+  //                                                           ▼
+  const ophtalmologistSummaries = [];
 
   for (let month = 1; month <= 12; month++) {
     const summary = await getMonthlySummary(year, month);
     monthlySummaries.push(summary);
+    ophtalmologistSummaries.push(summary.ophtalmologist);
   }
 
   // Get the total revenue and expenses for the year
@@ -314,6 +320,7 @@ async function getYearlySummary(year) {
   return {
     totals,
     monthly: monthlySummaries,
+    ophtalmologist: ophtalmologistSummaries,
   };
 }
 
