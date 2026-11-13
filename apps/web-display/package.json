@@ -1,6 +1,6 @@
 {
   "name": "@chehour/web",
-  "version": "0.35.03",
+  "version": "0.36.13",
   "private": true,
   "type": "module",
   "scripts": {
