@@ -1,6 +1,6 @@
 {
   "name": "@chehour/web",
-  "version": "0.36.13",
+  "version": "0.37.05",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chehour/backend": "*",
     "@chehour/utils": "*",
     "axios": "^1.19.0",
     "react": "^19.2.7",

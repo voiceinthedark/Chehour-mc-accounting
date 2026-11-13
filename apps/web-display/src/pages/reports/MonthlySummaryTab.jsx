@@ -21,6 +21,7 @@ import MonthYearSelector from "../../components/MonthYearSelector";
 import DollarPill from "../../components/Pills/DollarPill";
 import { API_REPORTS_URL } from "../../apiconfig";
 import { formatLebaneseToDollar, getCurrencyFromLocalStorage } from "../../utils/utilities";
+import { OPHTALMOLOGIST_NAME } from "@chehour/backend/utils/helpers";
 
 const CATEGORY_LABELS = {
   PATIENT_FEE: "رسوم المرضى",
@@ -30,6 +31,8 @@ const CATEGORY_LABELS = {
   LAB_REVENUE: "إيرادات المختبر",
   CHARITY_EXPENSE: "نفقات التغطية",
   GENERAL_EXPENSE: "مصاريف عامة",
+  XRAY_REVENUE: "مدخول الأشعة",
+  XRAY_EXPENSE: "مصاريف الأشعة",
 };
 
 // ============================================================
@@ -275,6 +278,41 @@ function MonthlySummaryTab() {
                 </CardContent>
               </Card>
             </Grid>
+            <Grid item xs={12} sm={4} sx={{ position: "relative" }}>
+              <Card variant="outlined" sx={{ bgcolor: "#f0fdf8" }}>
+                <CardContent>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "success.dark",
+                    }}
+                  >
+                    صافي مدخول الأشعة
+                  </Typography>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: "success.dark" }}>
+                    {summary.xray ? Number(summary.xray.net).toLocaleString() : "—"}
+                  </Typography>
+                  <DollarPill
+                    position={"top-right"}
+                    amountInDollars={
+                      summary.xray
+                        ? formatLebaneseToDollar(summary.xray.net / localCurrencyRate)
+                        : "—"
+                    }
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "Almarai, sans-serif",
+                      color: "text.secondary",
+                    }}
+                  >
+                    ل.ل
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
 
           {/* Category breakdown */}
@@ -367,7 +405,7 @@ function MonthlySummaryTab() {
                     <TableRow hover>
                       <TableCell>
                         <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>
-                          {process.env.OPHTALMOLOGIST_NAME || "الطبيب العيون"}
+                          {OPHTALMOLOGIST_NAME || "الطبيب العيون"}
                         </Typography>
                       </TableCell>
                       <TableCell align="right">
@@ -425,6 +463,60 @@ function MonthlySummaryTab() {
                               summary.ophtalmologist.outflow / localCurrencyRate,
                             )}
                             )
+                          </Typography>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {/* X-ray row */}
+                  {summary.xray && (
+                    <TableRow hover>
+                      <TableCell>
+                        <Typography sx={{ fontFamily: "Almarai, sans-serif" }}>الأشعة</Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color:
+                              Number(summary.xray.inflow) > 0 ? "success.dark" : "text.disabled",
+                          }}
+                        >
+                          {Number(summary.xray.inflow) > 0
+                            ? Number(summary.xray.inflow).toLocaleString()
+                            : "—"}
+                        </Typography>
+                        {Number(summary.xray.inflow) > 0 && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
+                            }}
+                          >
+                            ({formatLebaneseToDollar(summary.xray.inflow / localCurrencyRate)})
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography
+                          sx={{
+                            color:
+                              Number(summary.xray.outflow) > 0 ? "error.dark" : "text.disabled",
+                          }}
+                        >
+                          {Number(summary.xray.outflow) > 0
+                            ? Number(summary.xray.outflow).toLocaleString()
+                            : "—"}
+                        </Typography>
+                        {Number(summary.xray.outflow) > 0 && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: "Almarai, sans-serif",
+                              color: "text.secondary",
+                            }}
+                          >
+                            ({formatLebaneseToDollar(summary.xray.outflow / localCurrencyRate)})
                           </Typography>
                         )}
                       </TableCell>
