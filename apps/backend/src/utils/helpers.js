@@ -33,8 +33,6 @@ const isOphtalmologistTx = (tx) => {
 
 const XRAY_CATEGORIES = ["XRAY_REVENUE", "XRAY_EXPENSE"];
 
-const isXrayTx = (tx) => {
-  XRAY_CATEGORIES.includes(tx.category);
-};
+const isXrayTx = (tx) => XRAY_CATEGORIES.includes(tx.category);
 
 module.exports = { isOphtalmologistTx, isXrayTx, OPHTALMOLOGIST_NAME, OPHTALMOLOGIST_ID };
