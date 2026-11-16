@@ -2,15 +2,23 @@
   "name": "@chehour/utils",
   "version": "1.0.0",
   "description": "A shared utility package for common functions and helpers.",
-  "main": "index.js",
+  "keywords": [
+    "helpers",
+    "shared",
+    "utilities"
+  ],
+  "license": "MIT",
+  "author": "Firas Abbas(abbas.firas@gmail.com)",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./constants/monthArabic": "./src/constants/monthArabic.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "shared",
-    "utilities",
-    "helpers"
-  ],
-  "author": "Firas Abbas(abbas.firas@gmail.com)",
-  "license": "MIT"
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
 }

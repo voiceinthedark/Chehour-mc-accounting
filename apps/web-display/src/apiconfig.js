@@ -6,6 +6,7 @@ const API_BILLING_URL = "http://localhost:4000/api/billing";
 const API_LAB_URL = "http://localhost:4000/api/lab";
 const API_LEDGER_URL = "http://localhost:4000/api/ledger";
 const API_REPORTS_URL = "http://localhost:4000/api/reports";
+const API_XRAY_URL = "http://localhost:4000/api/xray";
 
 export {
   API_BASE_URL,
@@ -14,4 +15,5 @@ export {
   API_LAB_URL,
   API_LEDGER_URL,
   API_REPORTS_URL,
+  API_XRAY_URL,
 };

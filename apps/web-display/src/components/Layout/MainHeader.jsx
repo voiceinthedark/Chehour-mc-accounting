@@ -9,58 +9,42 @@ const MainHeader = () => {
   return (
     <AppBar position="static" sx={{ backgroundColor: "#277147" }}>
       <Toolbar className="toolbar">
-        <Typography
-          variant="h6"
-          sx={{ fontFamily: "Almarai, sans-serif", fontSize: "2.5rem" }}
-        >
+        <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "2.5rem" }}>
           مركز شحور الصحي
         </Typography>
         <div className="toolbar-links">
           <LinkButton to="/" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               الرئيسية
             </Typography>
           </LinkButton>
           <LinkButton to="/ledger" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               الدفتر
             </Typography>
           </LinkButton>
           <LinkButton to="/lab" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               مختبر
             </Typography>
           </LinkButton>
+          <LinkButton to="/xray" color="inherit">
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
+              أشعة
+            </Typography>
+          </LinkButton>
           <LinkButton to="/billing" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               حسابات
             </Typography>
           </LinkButton>
           <LinkButton to="/reports" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               تقارير
             </Typography>
           </LinkButton>
           <LinkButton to="/settings" color="inherit">
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}
-            >
+            <Typography variant="h6" sx={{ fontFamily: "Almarai, sans-serif", fontSize: "1.5rem" }}>
               إعدادات
             </Typography>
           </LinkButton>

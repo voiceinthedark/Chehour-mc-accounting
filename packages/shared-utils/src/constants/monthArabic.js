@@ -1,6 +1,4 @@
-// filepath: packages/shared-utils/constants/monthArabic.js
-
-const monthArabic = {
+export const monthArabic = {
   1: "كلنون الثاني",
   2: "شباط",
   3: "آذار",
@@ -14,5 +12,3 @@ const monthArabic = {
   11: "تشرين الثاني",
   12: "كانون الأول",
 };
-
-export default monthArabic;

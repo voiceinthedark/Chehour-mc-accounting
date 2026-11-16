@@ -14,7 +14,7 @@ import {
   formatLebaneseToDollar,
   getCurrencyFromLocalStorage,
 } from "../../utils/utilities";
-import { monthArabic } from "@chehour/utils";
+import { monthArabic } from "@chehour/utils/constants/monthArabic";
 
 const YearlySummaryTab = () => {
   const [year, setYear] = useState(new Date().getFullYear());
