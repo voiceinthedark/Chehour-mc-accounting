@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -47,57 +47,56 @@ function MonthlySummaryTab() {
   const [loading, setLoading] = useState(false);
   const [localCurrencyRate, setLocalCurrencyRate] = useState(89500);
 
-  const fetchSummary = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}`);
-      setSummary(res.data);
-      console.log(res.data);
-    } catch {
-      toast.error("فشل تحميل الملخص المالي");
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
-
-  const fetchSummaryWithDetails = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}/details`);
-      setSummaryWithDetails(res.data);
-    } catch {
-      toast.error("فشل تحميل الملخص المالي مع التفاصيل");
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
-
-  const fetchDoctorSummary = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(
-        `${API_REPORTS_URL}/monthly-summary/${year}/${month}/doctor-details`,
-      );
-      setDoctorSummary(res.data);
-      console.log("Doctor Summary:", res.data);
-    } catch {
-      toast.error("فشل تحميل ملخص الأطباء");
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
-
   useEffect(() => {
-    fetchSummary();
-    fetchSummaryWithDetails();
-    fetchDoctorSummary();
-  }, [fetchSummary, fetchSummaryWithDetails, fetchDoctorSummary]);
+    let ignore = false;
+
+    const fetchAll = async () => {
+      try {
+        const [summaryRes, detailsRes, doctorRes] = await Promise.all([
+          axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}`),
+          axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}/details`),
+          axios.get(`${API_REPORTS_URL}/monthly-summary/${year}/${month}/doctor-details`),
+        ]);
+        if (ignore) return;
+        setSummary(summaryRes.data);
+        setSummaryWithDetails(detailsRes.data);
+        setDoctorSummary(doctorRes.data);
+      } catch {
+        if (!ignore) {
+          toast.error("فشل تحميل البيانات");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAll();
+    return () => {
+      ignore = true;
+    };
+  }, [month, year]);
+
+  const handleMonthChange = (value) => {
+    setLoading(true);
+    setMonth(value);
+  };
+
+  const handleYearChange = (value) => {
+    setLoading(true);
+    setYear(value);
+  };
 
   useEffect(() => {
     const currency = getCurrencyFromLocalStorage();
-    if (currency) setLocalCurrencyRate(currency);
-    else setLocalCurrencyRate(89500);
-  }, []);
+    const rate = currency === "USD" ? 1 : 89500; // Default to 89,500 if not USD
+    const changeCurrencyRate = (newRate) => {
+      setLocalCurrencyRate(newRate);
+    };
+
+    changeCurrencyRate(rate);
+  }, [localCurrencyRate]);
 
   const netIsPositive = summary && Number(summary.netProfit) >= 0;
 
@@ -126,8 +125,8 @@ function MonthlySummaryTab() {
       <MonthYearSelector
         month={month}
         year={year}
-        onMonthChange={setMonth}
-        onYearChange={setYear}
+        onMonthChange={handleMonthChange}
+        onYearChange={handleYearChange}
       />
 
       {loading ? (
