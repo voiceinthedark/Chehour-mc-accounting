@@ -38,6 +38,37 @@ async function createXrayOrder({ patientsCount, pricePerPatient, date }) {
 }
 
 /**
+ * Creates an X-ray order and accepts the total amount directly, without requiring patientsCount and pricePerPatient.
+ * This is useful for cases where the total is known but the breakdown is not.
+ */
+async function createXrayOrderWithTotal({ totalAmount, date }) {
+  const total = new Decimal(totalAmount);
+  const txDate = date ? new Date(date) : new Date();
+
+  return prisma.$transaction(async (tx) => {
+    const ledgerTx = await tx.ledgerTransaction.create({
+      data: {
+        amount: total.toFixed(2),
+        isOutflow: false,
+        category: "XRAY_REVENUE",
+        description: `X-ray fees — total amount`,
+        date: txDate,
+      },
+    });
+
+    return tx.xrayOrder.create({
+      data: {
+        date: txDate,
+        patientsCount: null, // Not provided
+        pricePerPatient: null, // Not provided
+        totalAmount: total.toFixed(2),
+        ledgerTransactionId: ledgerTx.id,
+      },
+    });
+  });
+}
+
+/**
  * Lists X-ray orders, optionally filtered by date range.
  */
 async function listXrayOrders({ startDate, endDate }) {
@@ -90,4 +121,5 @@ module.exports = {
   listXrayOrders,
   deleteXrayOrder,
   createXrayExpense,
+  createXrayOrderWithTotal,
 };

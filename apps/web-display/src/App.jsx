@@ -6,6 +6,7 @@ import Reports from "./pages/reports/Reports.jsx";
 import Billing from "./pages/billing/Billing.jsx";
 import LabOrders from "./pages/lab/LabOrders.jsx";
 import Ledger from "./pages/ledger/Ledger.jsx";
+import XRayEntry from "./pages/xray/XRayEntry.jsx";
 import { CurrencyProvider } from "./contexts/CurrencyContext.jsx";
 import "./App.css";
 
@@ -33,6 +34,14 @@ const router = createBrowserRouter([
     element: (
       <MainLayout>
         <Ledger />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/xray",
+    element: (
+      <MainLayout>
+        <XRayEntry />
       </MainLayout>
     ),
   },

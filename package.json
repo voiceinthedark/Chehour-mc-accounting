@@ -1,14 +1,14 @@
 {
   "name": "@chehour/accounting",
-  "version": "1.0.0",
+  "version": "0.38.16",
+  "private": true,
   "description": "Monorepo root for Chehour-mc-accounting",
+  "author": "Firas Abbas (abbas.firas@gmail.com)",
   "workspaces": [
     "packages/*",
     "apps/*",
     "apps/web-display/*"
   ],
-  "private": true,
-  "packageManager": "npm@9.6.7",
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
@@ -18,21 +18,6 @@
     "web:dev": "npm run dev -w apps/web-display",
     "prisma:seed": "npm run prisma:seed -w apps/backend",
     "prisma:reset": "npm run prisma:reset -w apps/backend"
-  },
-  "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@typescript-eslint/eslint-plugin": "^6.13.0",
-    "@typescript-eslint/parser": "^6.13.0",
-    "eslint": "^8.54.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.1.0",
-    "sass-embedded": "^1.96.0",
-    "turbo": "^2.6.1",
-    "typescript": "^5.3.0"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -60,5 +45,21 @@
     "stylis": "^4.4.0",
     "stylis-plugin-rtl": "^2.1.1",
     "winston": "^3.19.0"
-  }
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.1.0",
+    "sass-embedded": "^1.96.0",
+    "turbo": "^2.6.1",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@9.6.7"
 }

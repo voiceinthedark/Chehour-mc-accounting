@@ -12,7 +12,7 @@ import {
   Select,
   MenuItem,
   Paper,
-  CircularProgress,
+  Divider,
   Table,
   TableHead,
   TableBody,
@@ -24,6 +24,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API_XRAY_URL } from "../../apiconfig";
 import "@fontsource/almarai";
+import "@fontsource-variable/roboto";
 import { formatCurrencyToLebanese } from "../../utils/utilities";
 
 const MONTH_NAMES = [
@@ -105,7 +106,7 @@ export default function XRayEntry() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h3" fontFamily={"Almarai"} gutterBottom>
         إدخال بيانات الأشعة
       </Typography>
       <Grid container spacing={2}>
@@ -119,7 +120,9 @@ export default function XRayEntry() {
             >
               {MONTH_NAMES.map((month, index) => (
                 <MenuItem key={index} value={index + 1}>
-                  {month}
+                  <Typography variant="body1" sx={{ fontFamily: "Almarai" }}>
+                    {month}
+                  </Typography>
                 </MenuItem>
               ))}
             </Select>
@@ -135,41 +138,141 @@ export default function XRayEntry() {
             {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(
               (yearOption) => (
                 <MenuItem key={yearOption} value={yearOption}>
-                  {yearOption}
+                  <Typography variant="body1" sx={{ fontFamily: "Roboto" }}>
+                    {yearOption}
+                  </Typography>
                 </MenuItem>
               ),
             )}
           </Select>
         </Grid>
       </Grid>
+      <Box
+        sx={{
+          mt: 2,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          justifyContent: "stretch",
+          width: "100%",
+          fontFamily: "Almarai",
+        }}
+      >
+        <Box sx={{ mt: 2, fontFamily: "Almarai", flex: "1 0 auto" }}>
+          <TextField
+            label="عدد المرضى"
+            type="number"
+            value={monthlyPatientsCount}
+            onChange={(e) => setMonthlyPatientsCount(Number(e.target.value))}
+            fullWidth
+            fontFamily="Almarai"
+          />
+        </Box>
+        <Box sx={{ mt: 2, fontFamily: "Amlarai", flex: "1 0 auto" }}>
+          <TextField
+            label="رسوم الأشعة الشهرية"
+            type="number"
+            value={monthlyXRayFee}
+            onChange={(e) => setMonthlyXRayFee(Number(e.target.value))}
+            fullWidth
+            fontFamily="Almarai"
+          />
+        </Box>
+      </Box>
+      <Divider variant="middle" sx={{ mt: 2, mb: 2 }} />
+      <Typography
+        variant="h6"
+        sx={{ direction: "rtl", textAlign: "right", mt: 2 }}
+        fontFamily={"Almarai"}
+      >
+        أو أدخل الرصيد الشهري مباشرة:
+      </Typography>
       <Box sx={{ mt: 2 }}>
         <TextField
-          label="عدد المرضى"
+          label="إجمالي الإيرادات الشهرية"
           type="number"
-          value={monthlyPatientsCount}
-          onChange={(e) => setMonthlyPatientsCount(Number(e.target.value))}
+          value={totalXRayRevenue}
+          onChange={(e) => {
+            const newTotalRevenue = Number(e.target.value);
+            if (monthlyPatientsCount > 0) {
+              setMonthlyXRayFee(newTotalRevenue / monthlyPatientsCount);
+            }
+          }}
           fullWidth
+          fontFamily="Almarai"
         />
       </Box>
+
       <Box sx={{ mt: 2 }}>
-        <TextField
-          label="رسوم الأشعة الشهرية"
-          type="number"
-          value={monthlyXRayFee}
-          onChange={(e) => setMonthlyXRayFee(Number(e.target.value))}
-          fullWidth
-        />
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6">
+        <Typography variant="h6" fontFamily={"Almarai"}>
           إجمالي إيرادات الأشعة: {formatCurrencyToLebanese(totalXRayRevenue.current)}
         </Typography>
       </Box>
 
       <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" onClick={handleSubmit}>
-          حفظ البيانات
+          <Typography variant="body1" sx={{ fontFamily: "Almarai" }}>
+            حفظ البيانات
+          </Typography>
         </Button>
+      </Box>
+      {/* Display the table of all X-Ray data for the year */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h5" fontFamily={"Almarai"} gutterBottom>
+          بيانات الأشعة للعام {year}
+        </Typography>
+        {AllXRayData.length === 0 ? (
+          <Typography variant="body1" fontFamily={"Almarai"}>
+            لا توجد بيانات متاحة لهذا العام.
+          </Typography>
+        ) : (
+          <Paper>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>الشهر</TableCell>
+                  <TableCell>عدد المرضى</TableCell>
+                  <TableCell>رسوم الأشعة لكل مريض</TableCell>
+                  <TableCell>إجمالي الإيرادات</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {AllXRayData.map((data) => {
+                  const monthIndex = new Date(data.date).getMonth();
+                  const monthName = MONTH_NAMES[monthIndex];
+                  const totalRevenue = data.patientsCount * data.pricePerPatient;
+                  return (
+                    <TableRow key={data.date}>
+                      <TableCell>{monthName}</TableCell>
+                      <TableCell>{data.patientsCount}</TableCell>
+                      <TableCell>{formatCurrencyToLebanese(data.pricePerPatient)}</TableCell>
+                      <TableCell>{formatCurrencyToLebanese(totalRevenue)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={3} align="right">
+                    <Typography variant="h6" fontFamily={"Almarai"}>
+                      إجمالي الإيرادات السنوية:
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="h6" fontFamily={"Almarai"}>
+                      {formatCurrencyToLebanese(
+                        AllXRayData.reduce(
+                          (acc, data) => acc + data.patientsCount * data.pricePerPatient,
+                          0,
+                        ),
+                      )}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </Paper>
+        )}
       </Box>
     </Box>
   );

@@ -5,6 +5,7 @@ const {
   listXrayOrders,
   deleteXrayOrder,
   createXrayExpense,
+  createXrayOrderWithTotal,
 } = require("../services/xrayService");
 const logger = require("../utils/logger");
 
@@ -14,7 +15,11 @@ async function createXrayOrderHandler(req, res) {
   if (!Number.isInteger(Number(patientsCount)) || Number(patientsCount) <= 0) {
     return res.status(400).json({ error: "patientsCount must be a positive integer" });
   }
-  if (pricePerPatient === undefined || Number.isNaN(Number(pricePerPatient)) || Number(pricePerPatient) < 0) {
+  if (
+    pricePerPatient === undefined ||
+    Number.isNaN(Number(pricePerPatient)) ||
+    Number(pricePerPatient) < 0
+  ) {
     return res.status(400).json({ error: "pricePerPatient must be a non-negative number" });
   }
 
@@ -24,6 +29,26 @@ async function createXrayOrderHandler(req, res) {
   } catch (error) {
     logger.error(`Failed to create X-ray order: ${error.message}`);
     res.status(500).json({ error: "Failed to create X-ray order" });
+  }
+}
+
+/**
+ * Creates an X-ray order with a total amount directly, without requiring patientsCount and pricePerPatient.
+ * This is useful for cases where the total is known but the breakdown is not.
+ */
+async function createXrayOrderWithTotalHandler(req, res) {
+  const { totalAmount, date } = req.body;
+
+  if (totalAmount === undefined || Number.isNaN(Number(totalAmount)) || Number(totalAmount) <= 0) {
+    return res.status(400).json({ error: "totalAmount must be a positive number" });
+  }
+
+  try {
+    const xrayOrder = await createXrayOrderWithTotal({ totalAmount, date });
+    res.status(201).json({ success: true, xrayOrder });
+  } catch (error) {
+    logger.error(`Failed to create X-ray order with total: ${error.message}`);
+    res.status(500).json({ error: "Failed to create X-ray order with total" });
   }
 }
 
@@ -74,4 +99,5 @@ module.exports = {
   listXrayOrdersHandler,
   deleteXrayOrderHandler,
   createXrayExpenseHandler,
+  createXrayOrderWithTotalHandler,
 };
