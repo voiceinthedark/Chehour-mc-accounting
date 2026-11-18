@@ -59,8 +59,8 @@ async function createXrayOrderWithTotal({ totalAmount, date }) {
     return tx.xrayOrder.create({
       data: {
         date: txDate,
-        patientsCount: null, // Not provided
-        pricePerPatient: null, // Not provided
+        patientsCount: 0, // Not provided
+        pricePerPatient: 0, // Not provided
         totalAmount: total.toFixed(2),
         ledgerTransactionId: ledgerTx.id,
       },
