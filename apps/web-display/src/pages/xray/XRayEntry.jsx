@@ -49,12 +49,25 @@ export default function XRayEntry() {
   const [AllXRayData, setAllXRayData] = useState([]);
   const [monthlyPatientsCount, setMonthlyPatientsCount] = useState(0);
   const [monthlyXRayFee, setMonthlyXRayFee] = useState(0);
-
-  let totalXRayRevenue = monthlyPatientsCount * monthlyXRayFee;
+  const [totalXRayRevenue, setTotalXRayRevenue] = useState(
+    monthlyXRayFee * monthlyPatientsCount || 0,
+  );
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`${API_XRAY_URL}/orders`, {
+      // ── NOTE: We have two cases to handle when submitting X-Ray data: ───
+      // Case 1: If the user has entered the total directly, use the new API endpoint
+      if (monthlyPatientsCount === 0 && monthlyXRayFee === 0 && totalXRayRevenue > 0) {
+        await axios.post(`${API_XRAY_URL}/orders/with-total`, {
+          totalAmount: totalXRayRevenue,
+          date: new Date(year, selectedMonth - 1, 1).toISOString(),
+        });
+        toast.success("تم حفظ بيانات الأشعة بنجاح");
+        return;
+      }
+
+      // Case 2: If the user has entered patientsCount and pricePerPatient, use the existing API endpoint
+      await axios.post(`${API_XRAY_URL}/orders`, {
         patientsCount: monthlyPatientsCount,
         pricePerPatient: monthlyXRayFee,
         date: new Date(year, selectedMonth - 1, 1).toISOString(),
@@ -197,6 +210,7 @@ export default function XRayEntry() {
             if (monthlyPatientsCount > 0) {
               setMonthlyXRayFee(newTotalRevenue / monthlyPatientsCount);
             }
+            setTotalXRayRevenue(newTotalRevenue);
           }}
           fullWidth
           fontFamily="Almarai"
