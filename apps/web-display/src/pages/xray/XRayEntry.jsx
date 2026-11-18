@@ -244,23 +244,55 @@ export default function XRayEntry() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>الشهر</TableCell>
-                  <TableCell>عدد المرضى</TableCell>
-                  <TableCell>رسوم الأشعة لكل مريض</TableCell>
-                  <TableCell>إجمالي الإيرادات</TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontFamily={"Almarai"}>
+                      الشهر
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontFamily={"Almarai"}>
+                      عدد المرضى
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontFamily={"Almarai"}>
+                      رسوم الأشعة لكل مريض
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1" fontFamily={"Almarai"}>
+                      إجمالي الإيرادات
+                    </Typography>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {AllXRayData.map((data) => {
                   const monthIndex = new Date(data.date).getMonth();
                   const monthName = MONTH_NAMES[monthIndex];
-                  const totalRevenue = data.patientsCount * data.pricePerPatient;
+                  const totalRevenue = data.totalAmount;
                   return (
                     <TableRow key={data.date}>
-                      <TableCell>{monthName}</TableCell>
-                      <TableCell>{data.patientsCount}</TableCell>
-                      <TableCell>{formatCurrencyToLebanese(data.pricePerPatient)}</TableCell>
-                      <TableCell>{formatCurrencyToLebanese(totalRevenue)}</TableCell>
+                      <TableCell>
+                        <Typography variant="body1" fontFamily={"Almarai"}>
+                          {monthName}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" fontFamily={"Roboto"}>
+                          {data.patientsCount}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" fontFamily={"Roboto"}>
+                          {formatCurrencyToLebanese(data.pricePerPatient)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body1" fontFamily={"Roboto"}>
+                          {formatCurrencyToLebanese(totalRevenue)}
+                        </Typography>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -268,17 +300,14 @@ export default function XRayEntry() {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={3} align="right">
-                    <Typography variant="h6" fontFamily={"Almarai"}>
+                    <Typography variant="h6" fontFamily={"Almarai"} fontWeight={600}>
                       إجمالي الإيرادات السنوية:
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="h6" fontFamily={"Almarai"}>
+                    <Typography variant="h6" fontFamily={"Roboto"}>
                       {formatCurrencyToLebanese(
-                        AllXRayData.reduce(
-                          (acc, data) => acc + data.patientsCount * data.pricePerPatient,
-                          0,
-                        ),
+                        AllXRayData.reduce((acc, data) => acc + data.totalAmount, 0),
                       )}
                     </Typography>
                   </TableCell>
