@@ -1,7 +1,6 @@
 // filepath: web-display/src/pages/xray/XRayEntry.jsx
 
 import { useState, useEffect } from "react";
-
 import {
   FormControl,
   Typography,
@@ -19,6 +18,7 @@ import {
   TableFooter,
   TableCell,
   TableRow,
+  TableSortLabel,
 } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -52,6 +52,8 @@ export default function XRayEntry() {
   const [totalXRayRevenue, setTotalXRayRevenue] = useState(
     monthlyXRayFee * monthlyPatientsCount || 0,
   );
+  const [order, setOrder] = useState(null);
+  const [orderByTotal, setOrderByTotal] = useState(null);
 
   const handleSubmit = async () => {
     try {
@@ -77,6 +79,18 @@ export default function XRayEntry() {
       console.error("Error saving X-Ray data:", error);
       toast.error("حدث خطأ أثناء حفظ بيانات الأشعة");
     }
+  };
+
+  const handleSortByTotal = () => {
+    const isAsc = orderByTotal === "asc";
+    setOrderByTotal(isAsc ? "desc" : "asc");
+    const sortedData = [...AllXRayData].sort((a, b) => {
+      if (isAsc) {
+        return a.totalAmount - b.totalAmount;
+      }
+      return b.totalAmount - a.totalAmount;
+    });
+    setAllXRayData(sortedData);
   };
 
   // Fetch existing X-Ray data for the selected month and year
@@ -241,7 +255,7 @@ export default function XRayEntry() {
           </Typography>
         ) : (
           <Paper>
-            <Table>
+            <Table sx={{ minWidth: 650, backgroundColor: "#f5f5f5", direction: "rtl" }}>
               <TableHead>
                 <TableRow>
                   <TableCell>
@@ -260,9 +274,15 @@ export default function XRayEntry() {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1" fontFamily={"Almarai"}>
-                      إجمالي الإيرادات
-                    </Typography>
+                    <TableSortLabel
+                      active={orderByTotal !== null}
+                      direction={orderByTotal || "asc"}
+                      onClick={handleSortByTotal}
+                    >
+                      <Typography variant="body1" fontFamily={"Almarai"}>
+                        إجمالي الإيرادات
+                      </Typography>
+                    </TableSortLabel>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -300,14 +320,17 @@ export default function XRayEntry() {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={3} align="right">
-                    <Typography variant="h6" fontFamily={"Almarai"} fontWeight={600}>
+                    <Typography variant="h6" fontFamily={"Almarai"}>
                       إجمالي الإيرادات السنوية:
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="h6" fontFamily={"Roboto"}>
                       {formatCurrencyToLebanese(
-                        AllXRayData.reduce((acc, data) => acc + data.totalAmount, 0),
+                        AllXRayData.reduce(
+                          (acc, data) => parseInt(acc) + parseInt(data.totalAmount),
+                          0,
+                        ),
                       )}
                     </Typography>
                   </TableCell>
